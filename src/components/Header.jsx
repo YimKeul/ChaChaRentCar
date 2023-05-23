@@ -45,7 +45,7 @@ const Header = () => {
           </S.userBox>
         ) : (
           <Link
-            to="/"
+            to="/login"
             style={{
               textDecoration: "none",
               display: "flex",

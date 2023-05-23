@@ -1,3 +1,4 @@
 import chacharentcar from "./chacharentcar.png";
 import bgimg from "./bgimg.jpg";
-export { chacharentcar, bgimg };
+import great from "./great.png";
+export { chacharentcar, bgimg, great };
