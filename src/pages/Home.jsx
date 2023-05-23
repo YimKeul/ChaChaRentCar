@@ -2,16 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Header, Cfonts } from "../components";
 import styled from "styled-components";
 import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { Link } from "react-router-dom";
 import { CnuBlue, ChaCha, LightGray } from "../components";
 import { bgimg } from "../images";
 import { AiOutlineClockCircle, AiFillCar } from "react-icons/ai";
 import { GrPowerReset } from "react-icons/gr";
-import "react-datepicker/dist/react-datepicker.css";
 const Home = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [filter, setFilter] = useState(["전체"]);
+
   useEffect(() => {
     setFilter(["전체"]);
   }, []);
@@ -149,11 +150,17 @@ const Home = () => {
                 </S.btnBox>
               </S.row4>
             </S.RightContentBox>
-            <S.ButtonBox>
-              <Cfonts color="white" size={30}>
-                차량 조회하고 예약하기
-              </Cfonts>
-            </S.ButtonBox>
+            <Link
+              to="/reserve"
+              state={{ filter: filter, startDate: startDate, endDate: endDate }}
+              style={{ textDecoration: "none" }}
+            >
+              <S.ButtonBox>
+                <Cfonts color="white" size={30}>
+                  차량 조회하고 예약하기
+                </Cfonts>
+              </S.ButtonBox>
+            </Link>
           </S.RightHalf>
         </S.ContainerRow>
       </S.outBox>
@@ -250,7 +257,7 @@ const S = {
     width: 100px;
     text-align: center;
     font-weight: bold;
-    cursor: pointer;
+    /* cursor: pointer; */
   `,
 };
 

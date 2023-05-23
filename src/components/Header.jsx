@@ -6,7 +6,7 @@ import { chacharentcar } from "../images";
 import { MdPersonOutline } from "react-icons/md";
 
 const Header = () => {
-  const [isLogin, setLogin] = useState(false);
+  const [isLogin, setLogin] = useState(true);
 
   const handleSetLogin = () => {
     setLogin(!isLogin);
@@ -20,17 +20,32 @@ const Header = () => {
         </Link>
       </S.logoBox>
 
-      <S.navBox>
-        <Link to="/reserve" style={{ textDecoration: "none" }}>
-          <Cfonts size={30}>예약</Cfonts>
-        </Link>
-        <Link to="/myreserve" style={{ textDecoration: "none" }}>
-          <Cfonts size={30}>예약 내역</Cfonts>
-        </Link>
-        <Link to="/myrental" style={{ textDecoration: "none" }}>
-          <Cfonts size={30}>대여 내역</Cfonts>
-        </Link>
-      </S.navBox>
+      {isLogin ? (
+        <S.navBox>
+          <Link
+            to="/myreserve"
+            style={{ textDecoration: "none", marginRight: "40px" }}
+          >
+            <Cfonts size={30}>예약 내역</Cfonts>
+          </Link>
+          <Link to="/myrental" style={{ textDecoration: "none" }}>
+            <Cfonts size={30}>대여 내역</Cfonts>
+          </Link>
+        </S.navBox>
+      ) : (
+        <S.navBox>
+          <Link
+            to="/login"
+            style={{ textDecoration: "none", marginRight: "40px" }}
+          >
+            <Cfonts size={30}>예약 내역</Cfonts>
+          </Link>
+          <Link to="/login" style={{ textDecoration: "none" }}>
+            <Cfonts size={30}>대여 내역</Cfonts>
+          </Link>
+        </S.navBox>
+      )}
+
       <S.logBox>
         {isLogin ? (
           <S.userBox>
@@ -70,6 +85,8 @@ const Header = () => {
 const S = {
   container: styled.div`
     display: flex;
+    position: sticky;
+    top: 0;
     padding-inline: 24px;
     flex: 1;
     align-items: center;
@@ -82,7 +99,8 @@ const S = {
   navBox: styled.div`
     flex: 1;
     display: flex;
-    justify-content: space-evenly;
+    padding-left: 40px;
+    /* justify-content: space-; */
     align-items: center;
   `,
 
