@@ -2,6 +2,7 @@ import React from "react";
 import { Header, Cfonts, LightGray, CnuBlue } from "../components";
 import styled from "styled-components";
 import { great } from "../images";
+import { Link } from "react-router-dom";
 const Login = () => {
   return (
     <S.container>
@@ -20,14 +21,17 @@ const Login = () => {
               로그인
             </Cfonts>
           </S.button>
+
           <Cfonts>
             관리자이신가요?
-            <span
-              style={{ cursor: "pointer", color: `${CnuBlue}` }}
-              onClick={() => {}}
-            >
-              관리자 페이지 이동하기
-            </span>
+            <Link to="/manager" style={{ textDecoration: "none" }}>
+              <span
+                style={{ cursor: "pointer", color: `${CnuBlue}` }}
+                onClick={() => {}}
+              >
+                관리자 페이지 이동하기
+              </span>
+            </Link>
           </Cfonts>
         </S.formContainer>
         <S.imgBox>

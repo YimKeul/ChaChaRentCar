@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-
-const About = () => {
+import { MHeader, Cfonts } from "../components";
+const Manager = () => {
   const [selectedButtons, setSelectedButtons] = useState([]);
 
   const handleButtonClick = (button) => {
@@ -17,6 +17,7 @@ const About = () => {
 
   return (
     <div>
+      <MHeader />
       <h1>선택한 버튼 개수: {selectedButtons.length}</h1>
       <button onClick={() => handleButtonClick("A")}>A</button>
       <button onClick={() => handleButtonClick("B")}>B</button>
@@ -25,4 +26,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default Manager;

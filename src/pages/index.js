@@ -1,4 +1,7 @@
 import Home from "./Home";
-import About from "./About";
+import Manager from "./Manager";
 import Login from "./Login";
-export { Home, About, Login };
+import Reserve from "./Reserve";
+import ReserveList from "./ReserveList";
+import RentalList from "./RentalList";
+export { Home, Manager, Login, Reserve, ReserveList, RentalList };

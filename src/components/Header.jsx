@@ -21,13 +21,13 @@ const Header = () => {
       </S.logoBox>
 
       <S.navBox>
-        <Link to="/" style={{ textDecoration: "none" }}>
+        <Link to="/reserve" style={{ textDecoration: "none" }}>
           <Cfonts size={30}>예약</Cfonts>
         </Link>
-        <Link to="/" style={{ textDecoration: "none" }}>
+        <Link to="/myreserve" style={{ textDecoration: "none" }}>
           <Cfonts size={30}>예약 내역</Cfonts>
         </Link>
-        <Link to="/" style={{ textDecoration: "none" }}>
+        <Link to="/myrental" style={{ textDecoration: "none" }}>
           <Cfonts size={30}>대여 내역</Cfonts>
         </Link>
       </S.navBox>
