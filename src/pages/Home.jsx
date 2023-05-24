@@ -8,18 +8,34 @@ import { CnuBlue, ChaCha, LightGray } from "../components";
 import { bgimg } from "../images";
 import { AiOutlineClockCircle, AiFillCar } from "react-icons/ai";
 import { GrPowerReset } from "react-icons/gr";
+import axios from "axios";
+
+const selectAll = () => {
+  alert("selectALL");
+  axios.get("/");
+};
+
 const Home = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [filter, setFilter] = useState(["전체"]);
-
+  const [test, setTest] = useState("");
   useEffect(() => {
     setFilter(["전체"]);
+    axios
+      .get("/car")
+      .then((response) => {
+        setTest(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }, []);
 
   useEffect(() => {
     console.log("filter", filter);
-  }, [filter]);
+    console.log("test : ", test);
+  }, [filter, test]);
 
   const handleAll = () => {
     setFilter(["전체"]);
