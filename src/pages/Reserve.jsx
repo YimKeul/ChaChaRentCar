@@ -44,6 +44,8 @@ const Reserve = () => {
     return arr.join(",");
   };
   const searchRentCar = () => {
+    console.log(convertDateFormat(startDate));
+    console.log(convertDateFormat(endDate));
     if (filter[0] === "전체") {
       axios
         .get(
@@ -52,8 +54,8 @@ const Reserve = () => {
           )}&endDate=${convertDateFormat(endDate)}`
         )
         .then((response) => {
-          console.log(response.data);
           setData(response.data);
+          console.log(response.data);
         })
         .catch((error) => {
           console.error(error);
@@ -69,8 +71,8 @@ const Reserve = () => {
           `
         )
         .then((response) => {
-          console.log(response.data);
           setData(response.data);
+          console.log(response.data);
         })
         .catch((error) => {
           console.error(error);
@@ -217,15 +219,27 @@ const Reserve = () => {
               </S.row4>
             </S.RightContentBox>
 
-            <S.ButtonBox
-              onClick={() => {
-                searchRentCar();
-              }}
-            >
-              <Cfonts color="white" size={30}>
-                다시 검색하기
-              </Cfonts>
-            </S.ButtonBox>
+            {startDate <= endDate ? (
+              <S.ButtonBox
+                onClick={() => {
+                  searchRentCar();
+                }}
+              >
+                <Cfonts color="white" size={30}>
+                  다시 검색하기
+                </Cfonts>
+              </S.ButtonBox>
+            ) : (
+              <S.ButtonBox
+                onClick={() => {
+                  alert("날짜를 확인해주세요");
+                }}
+              >
+                <Cfonts color="white" size={30}>
+                  다시 검색하기
+                </Cfonts>
+              </S.ButtonBox>
+            )}
           </S.RightContainer>
         </S.RightHalf>
       </S.ContainerRow>

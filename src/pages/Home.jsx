@@ -18,10 +18,6 @@ const Home = () => {
     setFilter(["전체"]);
   }, []);
 
-  useEffect(() => {
-    console.log("filter", filter);
-  }, [filter]);
-
   const handleAll = () => {
     setFilter(["전체"]);
   };
@@ -151,21 +147,33 @@ const Home = () => {
                 </S.btnBox>
               </S.row4>
             </S.RightContentBox>
-            <Link
-              to="/reserve"
-              state={{
-                filter: filter,
-                startDate: startDate,
-                endDate: endDate,
-              }}
-              style={{ textDecoration: "none" }}
-            >
-              <S.ButtonBox>
+            {startDate <= endDate ? (
+              <Link
+                to="/reserve"
+                state={{
+                  filter: filter,
+                  startDate: startDate,
+                  endDate: endDate,
+                }}
+                style={{ textDecoration: "none" }}
+              >
+                <S.ButtonBox>
+                  <Cfonts color="white" size={30}>
+                    차량 조회하고 예약하기
+                  </Cfonts>
+                </S.ButtonBox>
+              </Link>
+            ) : (
+              <S.ButtonBox
+                onClick={() => {
+                  alert("날짜를 확인해주세요");
+                }}
+              >
                 <Cfonts color="white" size={30}>
                   차량 조회하고 예약하기
                 </Cfonts>
               </S.ButtonBox>
-            </Link>
+            )}
           </S.RightHalf>
         </S.ContainerRow>
       </S.outBox>
