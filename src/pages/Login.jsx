@@ -102,8 +102,6 @@ const S = {
   row: styled.div`
     display: flex;
     height: 100%;
-    /* justify-content: center; */
-    /* margin-top: 160px; */
   `,
   formContainer: styled.div`
     display: flex;

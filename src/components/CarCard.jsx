@@ -1,16 +1,51 @@
-import React from "react";
-import { santafe } from "../images";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Cfonts, CnuBlue, OpBlue, SubGray } from "../components";
+import {
+  Cfonts,
+  CnuBlue,
+  OpBlue,
+  SubGray,
+  convertDateFormat,
+} from "../components";
+import axios from "axios";
+
 const CarCard = ({
   carimg,
   name,
   type,
   fuel,
   numberOfSeats,
+  LICENSEPLATENO,
   rentRatePerDay,
   options,
+  startDate,
+  endDate,
 }) => {
+  const [isUser, setUser] = useState();
+  useEffect(() => {
+    setUser(sessionStorage.getItem("userId"));
+  }, [isUser]);
+
+  const reserve = () => {
+    axios
+      .get(
+        `/reserve?licensePlateNo=${LICENSEPLATENO}&startDate=${convertDateFormat(
+          startDate
+        )}&reserveDate=${convertDateFormat(
+          new Date()
+        )}&endDate=${convertDateFormat(endDate)}&name=${isUser}
+    `
+      )
+      .then((response) => {
+        // setData(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    document.location.href = "/reserve";
+  };
+
   return (
     <S.container>
       <S.cardBox>
@@ -28,7 +63,11 @@ const CarCard = ({
             </Cfonts>
           </S.leftArea>
           <S.rightArea>
-            <S.reserveBtn onClick={() => {}}>
+            <S.reserveBtn
+              onClick={() => {
+                reserve();
+              }}
+            >
               <Cfonts size={30} color="white">
                 예약하기
               </Cfonts>

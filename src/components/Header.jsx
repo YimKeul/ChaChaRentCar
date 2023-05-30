@@ -8,10 +8,6 @@ import { MdPersonOutline } from "react-icons/md";
 const Header = () => {
   const [isLogin, setLogin] = useState(false);
 
-  const handleSetLogin = () => {
-    setLogin(!isLogin);
-  };
-
   useEffect(() => {
     if (sessionStorage.getItem("userId") === null) {
       // sessionStorage 에 user_id 라는 key 값으로 저장된 값이 없다면
@@ -116,7 +112,6 @@ const S = {
     flex: 1;
     display: flex;
     padding-left: 40px;
-    /* justify-content: space-; */
     align-items: center;
   `,
 

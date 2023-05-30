@@ -7,6 +7,7 @@ import {
   CnuBlue,
   OpBlue,
   CarCard,
+  convertDateFormat,
 } from "../components";
 import * as carImages from "../images";
 import { useLocation, Link } from "react-router-dom";
@@ -32,20 +33,11 @@ const Reserve = () => {
   const handleAll = () => {
     setFilter(["전체"]);
   };
-  const convertDateFormat = (dateString) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
 
   const formatArrayToString = (arr) => {
     return arr.join(",");
   };
   const searchRentCar = () => {
-    console.log(convertDateFormat(startDate));
-    console.log(convertDateFormat(endDate));
     if (filter[0] === "전체") {
       axios
         .get(
@@ -112,11 +104,14 @@ const Reserve = () => {
                 key={index}
                 carimg={carImageMap[car.modelName]}
                 name={car.modelName}
+                LICENSEPLATENO={car.LICENSEPLATENO}
                 type={car.vehicleType}
                 fuel={car.fuel}
                 numberOfSeats={car.numberOfSeats}
                 rentRatePerDay={car.rentRatePerDay}
                 options={car.options}
+                startDate={startDate}
+                endDate={endDate}
               />
             ))}
         </S.LeftHalf>
