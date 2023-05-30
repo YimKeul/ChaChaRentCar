@@ -9,7 +9,6 @@ import {
   CarCard,
 } from "../components";
 import * as carImages from "../images";
-// import { 모닝, 테슬리, 싼타페, K5, 카니발 } from "../images";
 import { useLocation, Link } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
