@@ -32,7 +32,6 @@ const Reserve = () => {
   const handleAll = () => {
     setFilter(["전체"]);
   };
-
   const convertDateFormat = (dateString) => {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -40,13 +39,10 @@ const Reserve = () => {
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
-  // function urlEncode(str) {
-  //   return encodeURIComponent(str);
-  // }
-  // function urlDecode(str) {
-  //   return decodeURIComponent(str);
-  // }
 
+  const formatArrayToString = (arr) => {
+    return arr.join(",");
+  };
   const searchRentCar = () => {
     if (filter[0] === "전체") {
       axios
@@ -63,7 +59,22 @@ const Reserve = () => {
           console.error(error);
         });
     } else {
-      alert("Hello");
+      axios
+        .get(
+          `/selecttype?startDate=${convertDateFormat(
+            startDate
+          )}&endDate=${convertDateFormat(
+            endDate
+          )}&vehicleType=${formatArrayToString(filter)}
+          `
+        )
+        .then((response) => {
+          console.log(response.data);
+          setData(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }
   };
   const [data, setData] = useState();
