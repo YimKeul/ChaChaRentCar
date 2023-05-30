@@ -37,16 +37,6 @@ app.get("/allcar", (req, res) => {
   });
 });
 
-// app.get("/start", (req, res) => {
-//   db.query("SELECT * FROM CarModel", (err, data) => {
-//     if (!err) {
-//       console.log(data);
-//     } else {
-//       console.log(err);
-//     }
-//   });
-// });
-
 app.get("/reserve", (req, res) => {
   const { startDate, endDate, vehicleType } = req.query;
   const query = `
