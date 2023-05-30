@@ -69,6 +69,37 @@ GROUP BY rc.LICENSEPLATENO, cm.modelName, cm.vehicleType, cm.rentRatePerDay, cm.
   });
 });
 
+app.post("/onLogin", (req, res) => {
+  const inputId = req.query.inputId;
+  const inputPw = req.query.inputPw;
+  const query = `
+  SELECT *
+  FROM Customer
+  WHERE email = ? AND passwd = ?;
+  `;
+
+  db.query(query, [inputId, inputPw], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+
+    if (results.length === 1) {
+      // 쿼리 결과가 참인 경우
+      // res.json({ success: "Login successful" });
+      res.json(results[0]);
+      console.log(inputId, inputPw);
+      console.log("로그인 성공");
+    } else {
+      // 쿼리 결과가 거짓인 경우
+      res.json(results[0]);
+      console.log(inputId, inputPw);
+      console.log("로그인 실패");
+    }
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server On : http://localhost:${PORT}`);
 });

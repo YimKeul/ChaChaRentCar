@@ -1,9 +1,47 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Header, Cfonts, LightGray, CnuBlue } from "../components";
 import styled from "styled-components";
 import { great } from "../images";
 import { Link } from "react-router-dom";
+import axios from "axios";
 const Login = () => {
+  const [inputId, setInputId] = useState("");
+  const [inputPw, setInputPw] = useState("");
+
+  // input data 의 변화가 있을 때마다 value 값을 변경해서 useState 해준다
+  const handleInputId = (e) => {
+    setInputId(e.target.value);
+  };
+
+  const handleInputPw = (e) => {
+    setInputPw(e.target.value);
+  };
+
+  // login 버튼 클릭 이벤트
+  const onClickLogin = () => {
+    axios
+      .post("/onLogin", null, {
+        params: {
+          inputId: inputId,
+          inputPw: inputPw,
+        },
+      })
+      .then((res) => {
+        console.log(res);
+        if (res.data.email === undefined) {
+          alert("회원정보가 없습니다");
+        }
+
+        console.log("res.data.email :: ", res.data.email);
+        console.log("res.data.passwd :: ", res.data.passwd);
+        console.log("res.data.name :: ", res.data.name);
+        sessionStorage.setItem("userId", res.data.name);
+        // 작업 완료 되면 페이지 이동(새로고침)
+        document.location.href = "/";
+      })
+      .catch();
+  };
+
   return (
     <S.container>
       <Header />
@@ -11,12 +49,26 @@ const Login = () => {
         <div style={{ flex: 1 }}></div>
         <S.formContainer>
           <S.inputGroup>
-            <S.input type="text" id="id" placeholder="아이디" />
+            <S.input
+              type="text"
+              id="id"
+              placeholder="이메일"
+              onChange={handleInputId}
+            />
           </S.inputGroup>
           <S.inputGroup>
-            <S.input type="password" id="password" placeholder="비밀번호" />
+            <S.input
+              type="password"
+              id="password"
+              placeholder="비밀번호"
+              onChange={handleInputPw}
+            />
           </S.inputGroup>
-          <S.button>
+          <S.button
+            onClick={() => {
+              onClickLogin();
+            }}
+          >
             <Cfonts size={30} color="white">
               로그인
             </Cfonts>

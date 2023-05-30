@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { Cfonts, LightGray, CnuBlue } from "../components";
@@ -6,10 +6,26 @@ import { chacharentcar } from "../images";
 import { MdPersonOutline } from "react-icons/md";
 
 const Header = () => {
-  const [isLogin, setLogin] = useState(true);
+  const [isLogin, setLogin] = useState(false);
 
   const handleSetLogin = () => {
     setLogin(!isLogin);
+  };
+
+  useEffect(() => {
+    if (sessionStorage.getItem("userId") === null) {
+      // sessionStorage 에 user_id 라는 key 값으로 저장된 값이 없다면
+    } else {
+      // sessionStorage 에 user_id 라는 key 값으로 저장된 값이 있다면
+      // 로그인 상태 변경
+      setLogin(true);
+    }
+  }, [isLogin]);
+
+  const logOut = () => {
+    sessionStorage.removeItem("userId");
+    // App 으로 이동(새로고침)
+    document.location.href = "/";
   };
 
   return (
@@ -50,9 +66,9 @@ const Header = () => {
         {isLogin ? (
           <S.userBox>
             <Cfonts size={20} color={LightGray}>
-              000님
+              {sessionStorage.getItem("userId")}님
             </Cfonts>
-            <S.logOutBtn onClick={() => handleSetLogin()}>
+            <S.logOutBtn onClick={() => logOut()}>
               <Cfonts size={15} color={CnuBlue}>
                 로그아웃
               </Cfonts>
