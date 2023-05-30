@@ -33,10 +33,6 @@ const Reserve = () => {
     setFilter(["전체"]);
   };
 
-  const handleclick = () => {
-    console.log(filter);
-  };
-
   const convertDateFormat = (dateString) => {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -51,12 +47,7 @@ const Reserve = () => {
   //   return decodeURIComponent(str);
   // }
 
-  const [data, setData] = useState();
-  useEffect(() => {
-    // console.log(convertDateFormat(startDate));
-    // console.log(convertDateFormat(endDate));
-    // console.log(filter);
-
+  const searchRentCar = () => {
     if (filter[0] === "전체") {
       axios
         .get(
@@ -71,7 +62,13 @@ const Reserve = () => {
         .catch((error) => {
           console.error(error);
         });
+    } else {
+      alert("Hello");
     }
+  };
+  const [data, setData] = useState();
+  useEffect(() => {
+    searchRentCar();
   }, []);
 
   const handleFilter = (button) => {
@@ -211,7 +208,7 @@ const Reserve = () => {
 
             <S.ButtonBox
               onClick={() => {
-                handleclick();
+                searchRentCar();
               }}
             >
               <Cfonts color="white" size={30}>
