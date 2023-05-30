@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import {
   Header,
@@ -8,13 +8,22 @@ import {
   OpBlue,
   CarCard,
 } from "../components";
-import { santafe, morning, k5, kanival, tesla } from "../images";
+import * as carImages from "../images";
+// import { 모닝, 테슬리, 싼타페, K5, 카니발 } from "../images";
 import { useLocation, Link } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { AiOutlineClockCircle, AiFillCar } from "react-icons/ai";
 import { GrPowerReset } from "react-icons/gr";
+import axios from "axios";
 
+const carImageMap = {
+  싼타페: carImages.santafe,
+  K5: carImages.K5,
+  모닝: carImages.morning,
+  TESLA: carImages.tesla,
+  카니발: carImages.kanival,
+};
 const Reserve = () => {
   const location = useLocation();
   const [startDate, setStartDate] = useState(location.state.startDate);
@@ -24,6 +33,47 @@ const Reserve = () => {
   const handleAll = () => {
     setFilter(["전체"]);
   };
+
+  const handleclick = () => {
+    console.log(filter);
+  };
+
+  const convertDateFormat = (dateString) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+  // function urlEncode(str) {
+  //   return encodeURIComponent(str);
+  // }
+  // function urlDecode(str) {
+  //   return decodeURIComponent(str);
+  // }
+
+  const [data, setData] = useState();
+  useEffect(() => {
+    // console.log(convertDateFormat(startDate));
+    // console.log(convertDateFormat(endDate));
+    // console.log(filter);
+
+    if (filter[0] === "전체") {
+      axios
+        .get(
+          `/allcar?startDate=${convertDateFormat(
+            startDate
+          )}&endDate=${convertDateFormat(endDate)}`
+        )
+        .then((response) => {
+          console.log(response.data);
+          setData(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  }, []);
 
   const handleFilter = (button) => {
     if (button === "전체") {
@@ -44,53 +94,22 @@ const Reserve = () => {
   return (
     <div>
       <Header />
+
       <S.ContainerRow>
         <S.LeftHalf>
-          <CarCard
-            carimg={santafe}
-            name={"싼타페"}
-            type={"SUV"}
-            fuel={"가솔린"}
-            numberOfSeats={9}
-            rentRatePerDay={140000}
-            options={""}
-          />
-          <CarCard
-            carimg={tesla}
-            name={"테슬라"}
-            type={"전기차"}
-            fuel={"전기"}
-            numberOfSeats={5}
-            rentRatePerDay={120000}
-            options={""}
-          />
-          <CarCard
-            carimg={morning}
-            name={"모닝"}
-            type={"소형"}
-            fuel={"가솔린"}
-            numberOfSeats={5}
-            rentRatePerDay={100000}
-            options={""}
-          />
-          <CarCard
-            carimg={k5}
-            name={"K5"}
-            type={"대형"}
-            fuel={"가솔린"}
-            numberOfSeats={5}
-            rentRatePerDay={130000}
-            options={""}
-          />
-          <CarCard
-            carimg={kanival}
-            name={"카니발"}
-            type={"승합"}
-            fuel={"디젤"}
-            numberOfSeats={9}
-            rentRatePerDay={170000}
-            options={""}
-          />
+          {data &&
+            data.map((car, index) => (
+              <CarCard
+                key={index}
+                carimg={carImageMap[car.modelName]}
+                name={car.modelName}
+                type={car.vehicleType}
+                fuel={car.fuel}
+                numberOfSeats={car.numberOfSeats}
+                rentRatePerDay={car.rentRatePerDay}
+                options={car.options}
+              />
+            ))}
         </S.LeftHalf>
 
         <S.RightHalf>
@@ -191,7 +210,11 @@ const Reserve = () => {
               </S.row4>
             </S.RightContentBox>
 
-            <S.ButtonBox>
+            <S.ButtonBox
+              onClick={() => {
+                handleclick();
+              }}
+            >
               <Cfonts color="white" size={30}>
                 다시 검색하기
               </Cfonts>

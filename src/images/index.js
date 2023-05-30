@@ -5,6 +5,6 @@ import morning from "./morning.png";
 import tesla from "./tesla.png";
 import santafe from "./santafe.png";
 import kanival from "./kanival.png";
-import k5 from "./k5.png";
+import K5 from "./k5.png";
 
-export { chacharentcar, bgimg, great, morning, tesla, santafe, k5, kanival };
+export { chacharentcar, bgimg, great, morning, tesla, santafe, K5, kanival };

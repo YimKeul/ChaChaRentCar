@@ -10,32 +10,17 @@ import { AiOutlineClockCircle, AiFillCar } from "react-icons/ai";
 import { GrPowerReset } from "react-icons/gr";
 import axios from "axios";
 
-const selectAll = () => {
-  alert("selectALL");
-  axios.get("/");
-};
-
 const Home = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [filter, setFilter] = useState(["전체"]);
-  const [test, setTest] = useState("");
   useEffect(() => {
     setFilter(["전체"]);
-    axios
-      .get("/car")
-      .then((response) => {
-        setTest(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
   }, []);
 
   useEffect(() => {
     console.log("filter", filter);
-    console.log("test : ", test);
-  }, [filter, test]);
+  }, [filter]);
 
   const handleAll = () => {
     setFilter(["전체"]);
@@ -168,7 +153,11 @@ const Home = () => {
             </S.RightContentBox>
             <Link
               to="/reserve"
-              state={{ filter: filter, startDate: startDate, endDate: endDate }}
+              state={{
+                filter: filter,
+                startDate: startDate,
+                endDate: endDate,
+              }}
               style={{ textDecoration: "none" }}
             >
               <S.ButtonBox>
