@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 4000;
 const db = require("./config/db.js");
+const nodemailer = require("nodemailer");
 
 app.get("/", (req, res) => {
   res.send("Hello world");
@@ -430,7 +431,6 @@ app.get("/getEmail", (req, res) => {
       res.status(500).json({ error: "Internal server error" });
       return;
     }
-    console.log("사용지 이메일은 ", results);
     res.json(results);
   });
 });
