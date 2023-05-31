@@ -19,17 +19,6 @@ const RentalList = () => {
     isNowRent(!nowRent);
   };
 
-  const refreshList = () => {
-    axios
-      .get(`/onAfterPay?name=${isUser}`)
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
-
   useEffect(() => {
     setUser(sessionStorage.getItem("userId"));
     axios
@@ -121,7 +110,7 @@ const RentalList = () => {
                           onClick={() => {
                             axios
                               .get(
-                                `/onPay?name=${isUser}&payment=${car.rentRatePerDayAccumulated1}`
+                                `/onPay?name=${isUser}&payment=${car.rentRatePerDayAccumulated1}&licensePlateNo=${car.licensePlateNo}`
                               )
                               .then((response) => {
                                 console.log(response.data);
@@ -129,7 +118,20 @@ const RentalList = () => {
                               .catch((error) => {
                                 console.error(error);
                               });
-                            refreshList();
+                            axios
+                              .get(
+                                `/cancelReserve?licensePlateNo=${
+                                  car.licensePlateNo
+                                }&startDate=${convertDateFormat(
+                                  car.startDate
+                                )}&name=${isUser}`
+                              )
+                              .then((response) => {
+                                console.log(response.data);
+                              })
+                              .catch((error) => {
+                                console.error(error);
+                              });
                             document.location.href = "/myrental";
                           }}
                         >

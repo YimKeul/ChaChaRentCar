@@ -222,7 +222,7 @@ app.get("/rentalList", (req, res) => {
     JOIN
       CarModel cm ON rc.modelName = cm.modelName
     WHERE
-      c.name = ? AND rs.endDate >= CURDATE()
+      c.name = ? AND rs.startDate <= CURDATE()
     ORDER BY
       rs.startDate DESC;
   `;
@@ -256,7 +256,7 @@ app.get("/rentalBeforeList", (req, res) => {
     JOIN
       RentCar rc ON pr.licensePlateNo = rc.licensePlateNo
     WHERE
-      c.name = ?
+      c.name = ? 
     ORDER BY
       pr.dateRented DESC;
   `;
@@ -273,9 +273,33 @@ app.get("/rentalBeforeList", (req, res) => {
 });
 
 //결제(반납)
+// app.get("/onPay", (req, res) => {
+//   const userName = req.query.name;
+//   const paymentValue = req.query.payment;
+
+//   const query = `
+//     INSERT INTO PreviousRental (licensePlateNo, dateRented, dateReturned, payment, cno)
+//     SELECT rc.licensePlateNo, rs.startDate, rs.endDate, ?, c.cno
+//     FROM Customer c
+//     JOIN Reserve rs ON c.cno = rs.cno
+//     JOIN RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
+//     WHERE c.name = ?;
+//   `;
+
+//   db.query(query, [paymentValue, userName], (err, results) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).json({ error: "Internal server error" });
+//       return;
+//     }
+
+//     res.json(results);
+//   });
+// });
 app.get("/onPay", (req, res) => {
   const userName = req.query.name;
   const paymentValue = req.query.payment;
+  const licensePlateNo = req.query.licensePlateNo;
 
   const query = `
     INSERT INTO PreviousRental (licensePlateNo, dateRented, dateReturned, payment, cno)
@@ -283,10 +307,16 @@ app.get("/onPay", (req, res) => {
     FROM Customer c
     JOIN Reserve rs ON c.cno = rs.cno
     JOIN RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
-    WHERE c.name = ?;
+    WHERE c.name = ?
+    ${licensePlateNo ? "AND rc.licensePlateNo = ?" : ""};
   `;
 
-  db.query(query, [paymentValue, userName], (err, results) => {
+  const queryParams = [paymentValue, userName];
+  if (licensePlateNo) {
+    queryParams.push(licensePlateNo);
+  }
+
+  db.query(query, queryParams, (err, results) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
@@ -297,20 +327,20 @@ app.get("/onPay", (req, res) => {
   });
 });
 
-app.get("/onAfterPay", (req, res) => {
-  const userName = req.query.name;
-  const query = `
-  DELETE FROM Reserve
-  WHERE cno IN (SELECT cno FROM Customer WHERE name = ?);`;
-  db.query(query, [userName], (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
-      return;
-    }
-    res.json({ success: true });
-  });
-});
+// app.get("/onAfterPay", (req, res) => {
+//   const userName = req.query.name;
+//   const query = `
+//   DELETE FROM Reserve
+//   WHERE cno IN (SELECT cno FROM Customer WHERE name = ?);`;
+//   db.query(query, [userName], (err, results) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).json({ error: "Internal server error" });
+//       return;
+//     }
+//     res.json({ success: true });
+//   });
+// });
 
 app.listen(PORT, () => {
   console.log(`Server On : http://localhost:${PORT}`);
