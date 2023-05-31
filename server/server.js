@@ -276,6 +276,7 @@ app.get("/rentalBeforeList", (req, res) => {
 // app.get("/onPay", (req, res) => {
 //   const userName = req.query.name;
 //   const paymentValue = req.query.payment;
+//   const licensePlateNo = req.query.licensePlateNo;
 
 //   const query = `
 //     INSERT INTO PreviousRental (licensePlateNo, dateRented, dateReturned, payment, cno)
@@ -283,10 +284,16 @@ app.get("/rentalBeforeList", (req, res) => {
 //     FROM Customer c
 //     JOIN Reserve rs ON c.cno = rs.cno
 //     JOIN RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
-//     WHERE c.name = ?;
+//     WHERE c.name = ?
+//     ${licensePlateNo ? "AND rc.licensePlateNo = ?" : ""};
 //   `;
 
-//   db.query(query, [paymentValue, userName], (err, results) => {
+//   const queryParams = [paymentValue, userName];
+//   if (licensePlateNo) {
+//     queryParams.push(licensePlateNo);
+//   }
+
+//   db.query(query, queryParams, (err, results) => {
 //     if (err) {
 //       console.error(err);
 //       res.status(500).json({ error: "Internal server error" });
@@ -308,8 +315,8 @@ app.get("/onPay", (req, res) => {
     JOIN Reserve rs ON c.cno = rs.cno
     JOIN RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
     WHERE c.name = ?
-    ${licensePlateNo ? "AND rc.licensePlateNo = ?" : ""};
-  `;
+    ${licensePlateNo ? "AND rc.licensePlateNo = ?" : ""}
+    ON DUPLICATE KEY UPDATE payment = VALUES(payment);`;
 
   const queryParams = [paymentValue, userName];
   if (licensePlateNo) {
@@ -327,20 +334,106 @@ app.get("/onPay", (req, res) => {
   });
 });
 
-// app.get("/onAfterPay", (req, res) => {
-//   const userName = req.query.name;
-//   const query = `
-//   DELETE FROM Reserve
-//   WHERE cno IN (SELECT cno FROM Customer WHERE name = ?);`;
-//   db.query(query, [userName], (err, results) => {
-//     if (err) {
-//       console.error(err);
-//       res.status(500).json({ error: "Internal server error" });
-//       return;
-//     }
-//     res.json({ success: true });
-//   });
-// });
+//관리자 질의 1
+app.get("/man1", (req, res) => {
+  const query = `
+    SELECT C.CNO, C.NAME, COUNT(DISTINCT P.LICENSEPLATENO) + COUNT(DISTINCT R.LICENSEPLATENO) AS TotalCount
+    FROM Customer C
+    LEFT JOIN PreviousRental P ON C.CNO = P.CNO
+    LEFT JOIN Reserve R ON C.CNO = R.CNO
+    GROUP BY C.CNO, C.NAME
+    ORDER BY TotalCount DESC;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+
+    res.json(results);
+  });
+});
+
+//관리자 잘의 2
+app.get("/man2", (req, res) => {
+  const query = `
+    SELECT LICENSEPLATENO, COUNT(*) AS RENTAL_COUNT
+    FROM (
+      SELECT LICENSEPLATENO
+      FROM PreviousRental
+      UNION ALL
+      SELECT LICENSEPLATENO
+      FROM Reserve
+    ) AS subquery
+    GROUP BY LICENSEPLATENO WITH ROLLUP
+    HAVING LICENSEPLATENO IS NOT NULL
+    ORDER BY RENTAL_COUNT DESC;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+
+    res.json(results);
+  });
+});
+
+//관리자 질의 3
+app.get("/man3", (req, res) => {
+  const query = `
+    SELECT c.CNO, c.NAME, c.EMAIL,
+           r.LICENSEPLATENO, r.STARTDATE, r.RESERVEDATE, r.ENDDATE
+    FROM (
+      SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO,
+             ROW_NUMBER() OVER (PARTITION BY LICENSEPLATENO ORDER BY STARTDATE DESC) AS RN
+      FROM (
+        SELECT LICENSEPLATENO, DATERENTED AS STARTDATE, DATERENTED AS RESERVEDATE, DATERETURNED AS ENDDATE, CNO
+        FROM PreviousRental
+        UNION ALL
+        SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO
+        FROM Reserve
+      ) AS subquery
+    ) AS r
+    JOIN Customer c ON r.CNO = c.CNO
+    WHERE r.RN = 1;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+
+    res.json(results);
+  });
+});
+
+//메일 보내기 작업용
+app.get("/getEmail", (req, res) => {
+  const userName = req.query.name;
+
+  const query = `
+    SELECT email
+    FROM Customer
+    WHERE name = ?;
+  `;
+
+  db.query(query, [userName], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+    console.log("사용지 이메일은 ", results);
+    res.json(results);
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server On : http://localhost:${PORT}`);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Header,
   Cfonts,
@@ -15,9 +15,11 @@ const RentalList = () => {
   const [isUser, setUser] = useState();
   const [data, setData] = useState();
   const [beforeData, setBeforeData] = useState();
+  const [email, getEmail] = useState();
   const handleList = () => {
     isNowRent(!nowRent);
   };
+  // const form = useRef();
 
   useEffect(() => {
     setUser(sessionStorage.getItem("userId"));
@@ -42,6 +44,20 @@ const RentalList = () => {
 
     // document.location.href = "/reserve";
   }, [isUser]);
+
+  useEffect(() => {
+    axios
+      .get(`/getEmail?name=${isUser}`)
+      .then((response) => {
+        getEmail(response.data[0].email);
+        // console.log("tt", response.data[0].email);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    // console.log(email[0].email);
+    // console.log(email);
+  }, [email, isUser]);
 
   return (
     <S.out>
@@ -107,32 +123,22 @@ const RentalList = () => {
                     <S.tableData>
                       <S.area>
                         <S.returnbtn
-                          onClick={() => {
-                            axios
-                              .get(
+                          onClick={async () => {
+                            try {
+                              await axios.get(
                                 `/onPay?name=${isUser}&payment=${car.rentRatePerDayAccumulated1}&licensePlateNo=${car.licensePlateNo}`
-                              )
-                              .then((response) => {
-                                console.log(response.data);
-                              })
-                              .catch((error) => {
-                                console.error(error);
-                              });
-                            axios
-                              .get(
+                              );
+                              await axios.get(
                                 `/cancelReserve?licensePlateNo=${
                                   car.licensePlateNo
                                 }&startDate=${convertDateFormat(
                                   car.startDate
                                 )}&name=${isUser}`
-                              )
-                              .then((response) => {
-                                console.log(response.data);
-                              })
-                              .catch((error) => {
-                                console.error(error);
-                              });
-                            document.location.href = "/myrental";
+                              );
+                              document.location.href = "/myrental";
+                            } catch (error) {
+                              console.error(error);
+                            }
                           }}
                         >
                           <Cfonts size={10} color="white">
