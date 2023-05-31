@@ -30,14 +30,15 @@ const Login = () => {
         console.log(res);
         if (res.data.email === undefined) {
           alert("회원정보가 없습니다");
+        } else {
+          sessionStorage.setItem("userId", res.data.name);
+          // 작업 완료 되면 페이지 이동(새로고침)
+          document.location.href = "/";
         }
 
         console.log("res.data.email :: ", res.data.email);
         console.log("res.data.passwd :: ", res.data.passwd);
         console.log("res.data.name :: ", res.data.name);
-        sessionStorage.setItem("userId", res.data.name);
-        // 작업 완료 되면 페이지 이동(새로고침)
-        document.location.href = "/";
       })
       .catch();
   };

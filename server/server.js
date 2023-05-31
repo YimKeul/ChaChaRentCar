@@ -8,6 +8,7 @@ app.get("/", (req, res) => {
   console.log("root");
 });
 
+// 날짜 선택만으로 전체 차량 검색
 app.get("/allcar", (req, res) => {
   const startDate = req.query.startDate;
   const endDate = req.query.endDate;
@@ -37,6 +38,7 @@ app.get("/allcar", (req, res) => {
   });
 });
 
+// 날짜 선택, 차종 선택 검색
 app.get("/selecttype", (req, res) => {
   const startDate = req.query.startDate;
   const endDate = req.query.endDate;
@@ -69,6 +71,7 @@ GROUP BY rc.LICENSEPLATENO, cm.modelName, cm.vehicleType, cm.rentRatePerDay, cm.
   });
 });
 
+// 로그인
 app.post("/onLogin", (req, res) => {
   const inputId = req.query.inputId;
   const inputPw = req.query.inputPw;
@@ -100,6 +103,7 @@ app.post("/onLogin", (req, res) => {
   });
 });
 
+// 예약 내역
 app.get("/reserveList", (req, res) => {
   const userName = req.query.name;
 
@@ -116,7 +120,7 @@ app.get("/reserveList", (req, res) => {
     JOIN
       Customer c ON rs.cno = c.cno
     WHERE
-      c.name = ? AND rs.startDate >= CURDATE();
+      c.name = ? AND rs.startDate > CURDATE()
   `;
 
   db.query(query, [userName], (err, results) => {
@@ -194,6 +198,117 @@ app.get("/cancelReserve", (req, res) => {
     } else {
       res.json({ message: "Reservation canceled successfully" });
     }
+  });
+});
+
+//대여 내역
+app.get("/rentalList", (req, res) => {
+  const userName = req.query.name;
+
+  const query = `
+    SELECT
+      cm.modelName,
+      rc.licensePlateNo,
+      rs.startDate,
+      rs.endDate,
+      (DATEDIFF(CURDATE(), rs.startDate)+1) * cm.rentRatePerDay AS rentRatePerDayAccumulated1,
+      (DATEDIFF(rs.endDate, rs.startDate)+1) * cm.rentRatePerDay AS rentRatePerDayAccumulated2
+    FROM
+      Customer c
+    JOIN
+      Reserve rs ON c.cno = rs.cno
+    JOIN
+      RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
+    JOIN
+      CarModel cm ON rc.modelName = cm.modelName
+    WHERE
+      c.name = ? AND rs.endDate >= CURDATE()
+    ORDER BY
+      rs.startDate DESC;
+  `;
+
+  db.query(query, [userName], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+    console.log(results, userName);
+    res.json(results);
+  });
+});
+//이전 대여 내역
+app.get("/rentalBeforeList", (req, res) => {
+  const userName = req.query.name;
+
+  const query = `
+    SELECT
+      c.name,
+      rc.modelName,
+      rc.licensePlateNo,
+      pr.dateRented,
+      pr.dateReturned,
+      pr.payment
+    FROM
+      Customer c
+    JOIN
+      PreviousRental pr ON c.cno = pr.cno
+    JOIN
+      RentCar rc ON pr.licensePlateNo = rc.licensePlateNo
+    WHERE
+      c.name = ?
+    ORDER BY
+      pr.dateRented DESC;
+  `;
+
+  db.query(query, [userName], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+    console.log("이전목록 ", results);
+    res.json(results);
+  });
+});
+
+//결제(반납)
+app.get("/onPay", (req, res) => {
+  const userName = req.query.name;
+  const paymentValue = req.query.payment;
+
+  const query = `
+    INSERT INTO PreviousRental (licensePlateNo, dateRented, dateReturned, payment, cno)
+    SELECT rc.licensePlateNo, rs.startDate, rs.endDate, ?, c.cno
+    FROM Customer c
+    JOIN Reserve rs ON c.cno = rs.cno
+    JOIN RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
+    WHERE c.name = ?;
+  `;
+
+  db.query(query, [paymentValue, userName], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+
+    res.json(results);
+  });
+});
+
+app.get("/onAfterPay", (req, res) => {
+  const userName = req.query.name;
+  const query = `
+  DELETE FROM Reserve
+  WHERE cno IN (SELECT cno FROM Customer WHERE name = ?);`;
+  db.query(query, [userName], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+    res.json({ success: true });
   });
 });
 

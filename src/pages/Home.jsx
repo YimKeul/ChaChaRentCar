@@ -8,7 +8,6 @@ import { CnuBlue, ChaCha, LightGray } from "../components";
 import { bgimg } from "../images";
 import { AiOutlineClockCircle, AiFillCar } from "react-icons/ai";
 import { GrPowerReset } from "react-icons/gr";
-import axios from "axios";
 
 const Home = () => {
   const [startDate, setStartDate] = useState(new Date());
