@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import { Cfonts, LightGray, CnuBlue } from "../components";
+import { Cfonts } from "../components";
 import { chacharentcar } from "../images";
-import { MdPersonOutline } from "react-icons/md";
 
 const MHeader = () => {
   return (

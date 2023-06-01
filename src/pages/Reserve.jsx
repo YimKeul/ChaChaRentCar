@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import {
   Header,
@@ -7,14 +7,23 @@ import {
   CnuBlue,
   OpBlue,
   CarCard,
+  convertDateFormat,
 } from "../components";
-import { santafe, morning, k5, kanival, tesla } from "../images";
-import { useLocation, Link } from "react-router-dom";
+import * as carImages from "../images";
+import { useLocation } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { AiOutlineClockCircle, AiFillCar } from "react-icons/ai";
 import { GrPowerReset } from "react-icons/gr";
+import axios from "axios";
 
+const carImageMap = {
+  싼타페: carImages.santafe,
+  K5: carImages.K5,
+  모닝: carImages.morning,
+  TESLA: carImages.tesla,
+  카니발: carImages.kanival,
+};
 const Reserve = () => {
   const location = useLocation();
   const [startDate, setStartDate] = useState(location.state.startDate);
@@ -24,6 +33,48 @@ const Reserve = () => {
   const handleAll = () => {
     setFilter(["전체"]);
   };
+
+  const formatArrayToString = (arr) => {
+    return arr.join(",");
+  };
+  const searchRentCar = () => {
+    if (filter[0] === "전체") {
+      axios
+        .get(
+          `/allcar?startDate=${convertDateFormat(
+            startDate
+          )}&endDate=${convertDateFormat(endDate)}`
+        )
+        .then((response) => {
+          setData(response.data);
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } else {
+      axios
+        .get(
+          `/selecttype?startDate=${convertDateFormat(
+            startDate
+          )}&endDate=${convertDateFormat(
+            endDate
+          )}&vehicleType=${formatArrayToString(filter)}
+          `
+        )
+        .then((response) => {
+          setData(response.data);
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  };
+  const [data, setData] = useState();
+  useEffect(() => {
+    searchRentCar();
+  });
 
   const handleFilter = (button) => {
     if (button === "전체") {
@@ -44,53 +95,25 @@ const Reserve = () => {
   return (
     <div>
       <Header />
+
       <S.ContainerRow>
         <S.LeftHalf>
-          <CarCard
-            carimg={santafe}
-            name={"싼타페"}
-            type={"SUV"}
-            fuel={"가솔린"}
-            numberOfSeats={9}
-            rentRatePerDay={140000}
-            options={""}
-          />
-          <CarCard
-            carimg={tesla}
-            name={"테슬라"}
-            type={"전기차"}
-            fuel={"전기"}
-            numberOfSeats={5}
-            rentRatePerDay={120000}
-            options={""}
-          />
-          <CarCard
-            carimg={morning}
-            name={"모닝"}
-            type={"소형"}
-            fuel={"가솔린"}
-            numberOfSeats={5}
-            rentRatePerDay={100000}
-            options={""}
-          />
-          <CarCard
-            carimg={k5}
-            name={"K5"}
-            type={"대형"}
-            fuel={"가솔린"}
-            numberOfSeats={5}
-            rentRatePerDay={130000}
-            options={""}
-          />
-          <CarCard
-            carimg={kanival}
-            name={"카니발"}
-            type={"승합"}
-            fuel={"디젤"}
-            numberOfSeats={9}
-            rentRatePerDay={170000}
-            options={""}
-          />
+          {data &&
+            data.map((car, index) => (
+              <CarCard
+                key={index}
+                carimg={carImageMap[car.modelName]}
+                name={car.modelName}
+                LICENSEPLATENO={car.LICENSEPLATENO}
+                type={car.vehicleType}
+                fuel={car.fuel}
+                numberOfSeats={car.numberOfSeats}
+                rentRatePerDay={car.rentRatePerDay}
+                options={car.options}
+                startDate={startDate}
+                endDate={endDate}
+              />
+            ))}
         </S.LeftHalf>
 
         <S.RightHalf>
@@ -191,11 +214,27 @@ const Reserve = () => {
               </S.row4>
             </S.RightContentBox>
 
-            <S.ButtonBox>
-              <Cfonts color="white" size={30}>
-                다시 검색하기
-              </Cfonts>
-            </S.ButtonBox>
+            {startDate <= endDate ? (
+              <S.ButtonBox
+                onClick={() => {
+                  searchRentCar();
+                }}
+              >
+                <Cfonts color="white" size={30}>
+                  다시 검색하기
+                </Cfonts>
+              </S.ButtonBox>
+            ) : (
+              <S.ButtonBox
+                onClick={() => {
+                  alert("날짜를 확인해주세요");
+                }}
+              >
+                <Cfonts color="white" size={30}>
+                  다시 검색하기
+                </Cfonts>
+              </S.ButtonBox>
+            )}
           </S.RightContainer>
         </S.RightHalf>
       </S.ContainerRow>

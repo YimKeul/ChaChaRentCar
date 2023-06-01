@@ -1,11 +1,83 @@
-import React, { useState } from "react";
-import { Header, Cfonts, LightGray, CnuBlue, BgGray } from "../components";
+import React, { useState, useEffect } from "react";
+import {
+  Header,
+  Cfonts,
+  LightGray,
+  CnuBlue,
+  BgGray,
+  convertDateFormat,
+} from "../components";
 import styled from "styled-components";
+import axios from "axios";
+import emailjs from "@emailjs/browser";
+
 const RentalList = () => {
   const [nowRent, isNowRent] = useState(true);
+  const [isUser, setUser] = useState();
+  const [data, setData] = useState();
+  const [beforeData, setBeforeData] = useState();
+  const [email, getEmail] = useState();
+  const [templateParams, getTemplateParams] = useState();
+  // var templateParams = {
+  //   name: "고객1",
+  //   modelName: "모닝",
+  //   dateReturned: "2099-11-11",
+  //   payment: "999999",
+  //   email: "macsejun29@gmail.com",
+  // };
   const handleList = () => {
     isNowRent(!nowRent);
   };
+
+  const sendEmail = () => {
+    emailjs
+      .send(
+        "service_se1yive",
+        "template_qslwsnm",
+        templateParams,
+        "zD25jO1PgJcfnQ-YV"
+      )
+      .then(
+        (result) => {
+          console.log(result.text);
+        },
+        (error) => {
+          console.log(error.text);
+        }
+      );
+  };
+
+  useEffect(() => {
+    setUser(sessionStorage.getItem("userId"));
+    axios
+      .get(`/rentalList?name=${isUser}`)
+      .then((response) => {
+        setData(response.data);
+        // console.log(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    axios
+      .get(`/rentalBeforeList?name=${isUser}`)
+      .then((response) => {
+        setBeforeData(response.data);
+        // console.log(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    axios
+      .get(`/getEmail?name=${isUser}`)
+      .then((response) => {
+        getEmail(response.data[0].email);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, [isUser, email]);
+  // useEffect(() => {}, [email, isUser]);
 
   return (
     <S.out>
@@ -47,25 +119,82 @@ const RentalList = () => {
                 <S.tableHeader>차량번호</S.tableHeader>
                 <S.tableHeader>대여 날짜</S.tableHeader>
                 <S.tableHeader>반납 예정일</S.tableHeader>
-                <S.tableHeader>예상 결제 금액</S.tableHeader>
-                <S.tableHeader>반납</S.tableHeader>
+                <S.tableHeader>
+                  예상 결제 금액
+                  <br />
+                  (당일/최종)
+                </S.tableHeader>
+                <S.tableHeader>결제</S.tableHeader>
               </S.tableRow>
-              <S.tableRow>
-                <S.tableData>모델명 1</S.tableData>
-                <S.tableData>차량번호 1</S.tableData>
-                <S.tableData>대여날짜 1</S.tableData>
-                <S.tableData>반납 예정일 1</S.tableData>
-                <S.tableData>예상 결제 금액1</S.tableData>
-                <S.tableData>반납 버튼 1</S.tableData>
-              </S.tableRow>
-              <S.tableRow>
-                <S.tableData>모델명 2</S.tableData>
-                <S.tableData>차량번호 2</S.tableData>
-                <S.tableData>대여날짜 2</S.tableData>
-                <S.tableData>반납 예정일 2</S.tableData>
-                <S.tableData>예상 결제 금액2</S.tableData>
-                <S.tableData>반납 버튼 2</S.tableData>
-              </S.tableRow>
+              {/*  */}
+              {data &&
+                data.map((car, index) => (
+                  <S.tableRow key={index}>
+                    <S.tableData>{car.modelName}</S.tableData>
+                    <S.tableData>{car.licensePlateNo}</S.tableData>
+                    <S.tableData>
+                      {convertDateFormat(car.startDate)}
+                    </S.tableData>
+                    <S.tableData>{convertDateFormat(car.endDate)}</S.tableData>
+                    <S.tableData>
+                      {car.rentRatePerDayAccumulated1}원 /{" "}
+                      {car.rentRatePerDayAccumulated2}원
+                    </S.tableData>
+                    <S.tableData>
+                      <S.area>
+                        <S.returnbtn
+                          onClick={async () => {
+                            try {
+                              await axios.get(
+                                `/onPay?name=${isUser}&payment=${car.rentRatePerDayAccumulated1}&licensePlateNo=${car.licensePlateNo}`
+                              );
+                              await axios.get(
+                                `/cancelReserve?licensePlateNo=${
+                                  car.licensePlateNo
+                                }&startDate=${convertDateFormat(
+                                  car.startDate
+                                )}&name=${isUser}`
+                              );
+                              await emailjs
+                                .send(
+                                  "service_se1yive",
+                                  "template_qslwsnm",
+                                  {
+                                    name: isUser,
+                                    modelName: car.modelName,
+                                    dateReturned: convertDateFormat(
+                                      car.endDate
+                                    ),
+                                    payment:
+                                      car.rentRatePerDayAccumulated1.toString(),
+                                    email: email,
+                                  },
+                                  "zD25jO1PgJcfnQ-YV"
+                                )
+                                .then(
+                                  (result) => {
+                                    console.log(result.text);
+                                  },
+                                  (error) => {
+                                    console.log(error.text);
+                                  }
+                                );
+                              document.location.href = "/myrental";
+                            } catch (error) {
+                              console.error(error);
+                            }
+                          }}
+                        >
+                          <Cfonts size={10} color="white">
+                            결제
+                          </Cfonts>
+                        </S.returnbtn>
+                      </S.area>
+                    </S.tableData>
+                  </S.tableRow>
+                ))}
+
+              {/*  */}
             </S.table>
           </S.listBox>
         ) : (
@@ -78,20 +207,26 @@ const RentalList = () => {
                 <S.tableHeader>반납 일</S.tableHeader>
                 <S.tableHeader>결제 금액</S.tableHeader>
               </S.tableRow>
-              <S.tableRow>
-                <S.tableData>모델명 1</S.tableData>
-                <S.tableData>차량번호 1</S.tableData>
-                <S.tableData>대여날짜 1</S.tableData>
-                <S.tableData>반납 일 1</S.tableData>
-                <S.tableData>결제 금액 1</S.tableData>
-              </S.tableRow>
-              <S.tableRow>
-                <S.tableData>모델명 2</S.tableData>
-                <S.tableData>차량번호 2</S.tableData>
-                <S.tableData>대여날짜 2</S.tableData>
-                <S.tableData>반납 일 2</S.tableData>
-                <S.tableData>결제 금액 2</S.tableData>
-              </S.tableRow>
+              {/*  */}
+
+              {beforeData &&
+                beforeData.map((car, index) => (
+                  <S.tableRow key={index}>
+                    <S.tableData>{car.modelName}</S.tableData>
+                    <S.tableData>{car.licensePlateNo}</S.tableData>
+                    <S.tableData>
+                      {convertDateFormat(car.dateRented)}
+                    </S.tableData>
+                    <S.tableData>
+                      {convertDateFormat(car.dateReturned)}
+                    </S.tableData>
+                    <S.tableData>{car.payment}원</S.tableData>
+                  </S.tableRow>
+                ))}
+
+              {/*  */}
+
+              {/*  */}
             </S.table>
           </S.listBox>
         )}
@@ -110,6 +245,7 @@ const S = {
   container: styled.div`
     padding-inline: 100px;
     height: 100%;
+    margin-top: 20px;
   `,
   row: styled.div`
     display: flex;
@@ -132,12 +268,24 @@ const S = {
   tableHeader: styled.th`
     padding: 10px;
     font-weight: bold;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid ${CnuBlue};
   `,
   tableData: styled.td`
     padding: 10px;
+    text-align: center;
     border-bottom: 1px solid ${LightGray};
+  `,
+  area: styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  `,
+  returnbtn: styled.div`
+    background-color: green;
+    width: 50%;
+    padding: 5px;
+    cursor: pointer;
   `,
 };
 
