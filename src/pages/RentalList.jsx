@@ -9,6 +9,7 @@ import {
 } from "../components";
 import styled from "styled-components";
 import axios from "axios";
+import emailjs from "@emailjs/browser";
 
 const RentalList = () => {
   const [nowRent, isNowRent] = useState(true);
@@ -16,8 +17,34 @@ const RentalList = () => {
   const [data, setData] = useState();
   const [beforeData, setBeforeData] = useState();
   const [email, getEmail] = useState();
+  const [templateParams, getTemplateParams] = useState();
+  // var templateParams = {
+  //   name: "고객1",
+  //   modelName: "모닝",
+  //   dateReturned: "2099-11-11",
+  //   payment: "999999",
+  //   email: "macsejun29@gmail.com",
+  // };
   const handleList = () => {
     isNowRent(!nowRent);
+  };
+
+  const sendEmail = () => {
+    emailjs
+      .send(
+        "service_se1yive",
+        "template_qslwsnm",
+        templateParams,
+        "zD25jO1PgJcfnQ-YV"
+      )
+      .then(
+        (result) => {
+          console.log(result.text);
+        },
+        (error) => {
+          console.log(error.text);
+        }
+      );
   };
 
   useEffect(() => {
@@ -26,7 +53,7 @@ const RentalList = () => {
       .get(`/rentalList?name=${isUser}`)
       .then((response) => {
         setData(response.data);
-        console.log(response.data);
+        // console.log(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -35,14 +62,12 @@ const RentalList = () => {
       .get(`/rentalBeforeList?name=${isUser}`)
       .then((response) => {
         setBeforeData(response.data);
-        console.log(response.data);
+        // console.log(response.data);
       })
       .catch((error) => {
         console.error(error);
       });
-  }, [isUser]);
 
-  useEffect(() => {
     axios
       .get(`/getEmail?name=${isUser}`)
       .then((response) => {
@@ -51,7 +76,8 @@ const RentalList = () => {
       .catch((error) => {
         console.error(error);
       });
-  }, [email, isUser]);
+  }, [isUser, email]);
+  // useEffect(() => {}, [email, isUser]);
 
   return (
     <S.out>
@@ -129,6 +155,30 @@ const RentalList = () => {
                                   car.startDate
                                 )}&name=${isUser}`
                               );
+                              await emailjs
+                                .send(
+                                  "service_se1yive",
+                                  "template_qslwsnm",
+                                  {
+                                    name: isUser,
+                                    modelName: car.modelName,
+                                    dateReturned: convertDateFormat(
+                                      car.endDate
+                                    ),
+                                    payment:
+                                      car.rentRatePerDayAccumulated1.toString(),
+                                    email: email,
+                                  },
+                                  "zD25jO1PgJcfnQ-YV"
+                                )
+                                .then(
+                                  (result) => {
+                                    console.log(result.text);
+                                  },
+                                  (error) => {
+                                    console.log(error.text);
+                                  }
+                                );
                               document.location.href = "/myrental";
                             } catch (error) {
                               console.error(error);
@@ -195,6 +245,7 @@ const S = {
   container: styled.div`
     padding-inline: 100px;
     height: 100%;
+    margin-top: 20px;
   `,
   row: styled.div`
     display: flex;

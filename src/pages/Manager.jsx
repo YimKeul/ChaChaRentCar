@@ -222,6 +222,7 @@ const S = {
   container: styled.div`
     padding-inline: 100px;
     height: 100%;
+    margin-top: 20px;
   `,
   row: styled.div`
     display: flex;
