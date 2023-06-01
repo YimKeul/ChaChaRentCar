@@ -10,8 +10,17 @@ import { AiOutlineClockCircle, AiFillCar } from "react-icons/ai";
 import { GrPowerReset } from "react-icons/gr";
 
 const Home = () => {
+  // var today = new Date();
+  // var tommorrow = new Date(today);
+  // const [startDate, setStartDate] = useState(
+  //   tommorrow.setDate(today.getDate() + 1)
+  // );
+  // const [endDate, setEndDate] = useState(
+  //   tommorrow.setDate(today.getDate() + 1)
+  // );
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+
   const [filter, setFilter] = useState(["전체"]);
   useEffect(() => {
     setFilter(["전체"]);
@@ -146,7 +155,7 @@ const Home = () => {
                 </S.btnBox>
               </S.row4>
             </S.RightContentBox>
-            {startDate <= endDate ? (
+            {startDate <= endDate && startDate >= new Date() ? (
               <Link
                 to="/reserve"
                 state={{

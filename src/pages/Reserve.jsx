@@ -47,7 +47,7 @@ const Reserve = () => {
         )
         .then((response) => {
           setData(response.data);
-          console.log(response.data);
+          // console.log(response.data);
         })
         .catch((error) => {
           console.error(error);
@@ -64,7 +64,7 @@ const Reserve = () => {
         )
         .then((response) => {
           setData(response.data);
-          console.log(response.data);
+          // console.log(response.data);
         })
         .catch((error) => {
           console.error(error);
@@ -214,7 +214,7 @@ const Reserve = () => {
               </S.row4>
             </S.RightContentBox>
 
-            {startDate <= endDate ? (
+            {startDate <= endDate && startDate >= new Date() ? (
               <S.ButtonBox
                 onClick={() => {
                   searchRentCar();

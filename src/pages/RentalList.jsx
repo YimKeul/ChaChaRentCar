@@ -17,34 +17,9 @@ const RentalList = () => {
   const [data, setData] = useState();
   const [beforeData, setBeforeData] = useState();
   const [email, getEmail] = useState();
-  const [templateParams, getTemplateParams] = useState();
-  // var templateParams = {
-  //   name: "고객1",
-  //   modelName: "모닝",
-  //   dateReturned: "2099-11-11",
-  //   payment: "999999",
-  //   email: "macsejun29@gmail.com",
-  // };
+
   const handleList = () => {
     isNowRent(!nowRent);
-  };
-
-  const sendEmail = () => {
-    emailjs
-      .send(
-        "service_se1yive",
-        "template_qslwsnm",
-        templateParams,
-        "zD25jO1PgJcfnQ-YV"
-      )
-      .then(
-        (result) => {
-          console.log(result.text);
-        },
-        (error) => {
-          console.log(error.text);
-        }
-      );
   };
 
   useEffect(() => {
@@ -122,7 +97,7 @@ const RentalList = () => {
                 <S.tableHeader>
                   예상 결제 금액
                   <br />
-                  (당일/최종)
+                  (금일 / 계약일)
                 </S.tableHeader>
                 <S.tableHeader>결제</S.tableHeader>
               </S.tableRow>
@@ -162,9 +137,7 @@ const RentalList = () => {
                                   {
                                     name: isUser,
                                     modelName: car.modelName,
-                                    dateReturned: convertDateFormat(
-                                      car.endDate
-                                    ),
+                                    dateReturned: convertDateFormat(new Date()),
                                     payment:
                                       car.rentRatePerDayAccumulated1.toString(),
                                     email: email,

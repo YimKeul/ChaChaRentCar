@@ -310,7 +310,7 @@ app.get("/onPay", (req, res) => {
 
   const query = `
     INSERT INTO PreviousRental (licensePlateNo, dateRented, dateReturned, payment, cno)
-    SELECT rc.licensePlateNo, rs.startDate, rs.endDate, ?, c.cno
+    SELECT rc.licensePlateNo, rs.startDate, CURDATE(), ?, c.cno
     FROM Customer c
     JOIN Reserve rs ON c.cno = rs.cno
     JOIN RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
