@@ -10,7 +10,7 @@ import {
   convertDateFormat,
 } from "../components";
 import * as carImages from "../images";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { AiOutlineClockCircle, AiFillCar } from "react-icons/ai";
@@ -74,7 +74,7 @@ const Reserve = () => {
   const [data, setData] = useState();
   useEffect(() => {
     searchRentCar();
-  }, []);
+  });
 
   const handleFilter = (button) => {
     if (button === "전체") {

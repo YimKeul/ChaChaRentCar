@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Header,
   Cfonts,
@@ -19,7 +19,6 @@ const RentalList = () => {
   const handleList = () => {
     isNowRent(!nowRent);
   };
-  // const form = useRef();
 
   useEffect(() => {
     setUser(sessionStorage.getItem("userId"));
@@ -41,8 +40,6 @@ const RentalList = () => {
       .catch((error) => {
         console.error(error);
       });
-
-    // document.location.href = "/reserve";
   }, [isUser]);
 
   useEffect(() => {
@@ -50,13 +47,10 @@ const RentalList = () => {
       .get(`/getEmail?name=${isUser}`)
       .then((response) => {
         getEmail(response.data[0].email);
-        // console.log("tt", response.data[0].email);
       })
       .catch((error) => {
         console.error(error);
       });
-    // console.log(email[0].email);
-    // console.log(email);
   }, [email, isUser]);
 
   return (

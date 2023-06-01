@@ -2,7 +2,6 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 4000;
 const db = require("./config/db.js");
-const nodemailer = require("nodemailer");
 
 app.get("/", (req, res) => {
   res.send("Hello world");
@@ -165,7 +164,7 @@ app.get("/reserve", (req, res) => {
       }
 
       res.json({ message: "Reservation created successfully" });
-      console.log(result);
+      // console.log(result);
     }
   );
 });
@@ -234,7 +233,7 @@ app.get("/rentalList", (req, res) => {
       res.status(500).json({ error: "Internal server error" });
       return;
     }
-    console.log(results, userName);
+    // console.log(results, userName);
     res.json(results);
   });
 });
@@ -268,7 +267,7 @@ app.get("/rentalBeforeList", (req, res) => {
       res.status(500).json({ error: "Internal server error" });
       return;
     }
-    console.log("이전목록 ", results);
+    // console.log("이전목록 ", results);
     res.json(results);
   });
 });

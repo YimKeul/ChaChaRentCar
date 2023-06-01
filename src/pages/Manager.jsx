@@ -49,7 +49,7 @@ const Manager = () => {
     console.log("1", man1);
     console.log("2", man2);
     console.log("3", man3);
-  }, []);
+  });
 
   return (
     <S.out>
