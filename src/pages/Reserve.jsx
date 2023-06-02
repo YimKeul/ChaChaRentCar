@@ -26,6 +26,7 @@ const carImageMap = {
 };
 const Reserve = () => {
   const location = useLocation();
+  const [nowDate] = useState(new Date());
   const [startDate, setStartDate] = useState(location.state.startDate);
   const [endDate, setEndDate] = useState(location.state.endDate);
   const [filter, setFilter] = useState(location.state.filter);
@@ -214,7 +215,7 @@ const Reserve = () => {
               </S.row4>
             </S.RightContentBox>
 
-            {startDate <= endDate && startDate >= new Date() ? (
+            {nowDate <= startDate && startDate <= endDate ? (
               <S.ButtonBox
                 onClick={() => {
                   searchRentCar();
