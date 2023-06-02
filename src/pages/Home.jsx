@@ -153,6 +153,7 @@ const Home = () => {
                 to="/reserve"
                 state={{
                   filter: filter,
+                  nowDate: nowDate,
                   startDate: startDate,
                   endDate: endDate,
                 }}

@@ -50,7 +50,7 @@ const CarCard = ({
     <S.container>
       <S.cardBox>
         <S.imgBox>
-          <img src={carimg} alt="santafe" />
+          <S.img src={carimg} alt="santafe" />
         </S.imgBox>
         <S.textBox>
           <S.leftArea>
@@ -104,6 +104,14 @@ const S = {
     justify-content: center;
     align-items: centers;
   `,
+  img: styled.img`
+    width: 100%;
+    height: 100%;
+    @media screen and (max-width: 1440px) {
+      width: 80%;
+      height: 100%;
+    }
+  `,
   textBox: styled.div`
     display: flex;
     flex: 1;
@@ -117,6 +125,9 @@ const S = {
     display: flex;
     flex-direction: column;
     flex: 4;
+    @media screen and (max-width: 1440px) {
+      flex: 2;
+    }
   `,
   rightArea: styled.div`
     display: flex;

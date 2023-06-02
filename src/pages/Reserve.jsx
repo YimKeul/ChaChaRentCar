@@ -26,7 +26,7 @@ const carImageMap = {
 };
 const Reserve = () => {
   const location = useLocation();
-  const [nowDate] = useState(new Date());
+  const [nowDate] = useState(location.state.startDate);
   const [startDate, setStartDate] = useState(location.state.startDate);
   const [endDate, setEndDate] = useState(location.state.endDate);
   const [filter, setFilter] = useState(location.state.filter);
@@ -75,7 +75,7 @@ const Reserve = () => {
   const [data, setData] = useState();
   useEffect(() => {
     searchRentCar();
-  });
+  }, []);
 
   const handleFilter = (button) => {
     if (button === "전체") {
@@ -313,6 +313,9 @@ const S = {
     background-color: #fff;
     width: 520px;
     border-radius: 15px;
+    @media screen and (max-width: 1440px) {
+      left: 58vw;
+    }
   `,
 
   RightContentBox: styled.div`
