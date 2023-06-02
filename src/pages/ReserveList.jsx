@@ -24,7 +24,7 @@ const ReserveList = () => {
       )
       .then((response) => {
         setData(response.data);
-        console.log(response.data);
+        // console.log(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -55,22 +55,39 @@ const ReserveList = () => {
                   <S.tableData>
                     <S.area>
                       <S.deletebtn
-                        onClick={() => {
-                          axios
-                            .get(
-                              `/cancelReserve?licensePlateNo=${
-                                car.licensePlateNo
-                              }&startDate=${convertDateFormat(
-                                car.startDate
-                              )}&name=${isUser}`
-                            )
-                            .then((response) => {
-                              console.log(response.data);
-                            })
-                            .catch((error) => {
-                              console.error(error);
-                            });
-                          document.location.href = "/myreserve";
+                        onClick={async () => {
+                          try {
+                            await axios
+                              .get(
+                                `/cancelReserve?licensePlateNo=${
+                                  car.licensePlateNo
+                                }&startDate=${convertDateFormat(
+                                  car.startDate
+                                )}&name=${isUser}`
+                              )
+                              .then((response) => {
+                                console.log(response.data);
+                              })
+                              .catch((error) => {
+                                console.error(error);
+                              });
+                            console.log("cancelReserve");
+
+                            await axios
+                              .get(
+                                `/updateDeleteRentCar?licensePlateNo=${car.licensePlateNo}&userName=${isUser}`
+                              )
+                              .then((response) => {
+                                console.log(response.data);
+                              })
+                              .catch((error) => {
+                                console.error(error);
+                              });
+                            console.log("updateRentcar");
+                          } catch (error) {
+                            console.log(error);
+                          }
+                          // document.location.href = "/myreserve";
                         }}
                       >
                         <Cfonts size={10} color="white">

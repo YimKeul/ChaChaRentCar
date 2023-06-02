@@ -42,13 +42,13 @@ const Reserve = () => {
     if (filter[0] === "전체") {
       axios
         .get(
-          `/allcar?startDate=${convertDateFormat(
+          `/searchRentCar?startDate=${convertDateFormat(
             startDate
           )}&endDate=${convertDateFormat(endDate)}`
         )
         .then((response) => {
           setData(response.data);
-          // console.log(response.data);
+          console.log(response.data);
         })
         .catch((error) => {
           console.error(error);
@@ -56,7 +56,7 @@ const Reserve = () => {
     } else {
       axios
         .get(
-          `/selecttype?startDate=${convertDateFormat(
+          `/searchRentCarOps?startDate=${convertDateFormat(
             startDate
           )}&endDate=${convertDateFormat(
             endDate
@@ -65,7 +65,6 @@ const Reserve = () => {
         )
         .then((response) => {
           setData(response.data);
-          // console.log(response.data);
         })
         .catch((error) => {
           console.error(error);
@@ -75,21 +74,16 @@ const Reserve = () => {
   const [data, setData] = useState();
   useEffect(() => {
     searchRentCar();
-    console.log(data);
   }, []);
 
   const handleFilter = (button) => {
     if (button === "전체") {
-      // '전체' 버튼을 선택한 경우, filter 배열을 초기화하여 '전체'만 포함하도록 합니다.
       setFilter(["전체"]);
     } else if (filter.includes("전체")) {
-      // '전체' 버튼을 선택한 후 다른 버튼을 선택한 경우, '전체'를 제외한 나머지 버튼들만으로 새로운 배열을 생성합니다.
       setFilter([button]);
     } else if (filter.includes(button)) {
-      // 이미 선택된 버튼을 다시 선택한 경우, 해당 버튼을 filter에서 제외합니다.
       setFilter(filter.filter((item) => item !== button));
     } else {
-      // 새로운 버튼을 선택한 경우, 해당 버튼을 filter에 추가합니다.
       setFilter([...filter, button]);
     }
   };
@@ -106,12 +100,12 @@ const Reserve = () => {
                 key={index}
                 carimg={carImageMap[car.modelName]}
                 name={car.modelName}
-                LICENSEPLATENO={car.LICENSEPLATENO}
+                licensePlateNo={car.licensePlateNo}
                 type={car.vehicleType}
                 fuel={car.fuel}
                 numberOfSeats={car.numberOfSeats}
                 rentRatePerDay={car.rentRatePerDay}
-                options={car.options}
+                options={car.optionName}
                 startDate={startDate}
                 endDate={endDate}
               />

@@ -7,25 +7,48 @@ app.get("/", (req, res) => {
   res.send("Hello world");
   console.log("root");
 });
+// 로그인
+app.post("/onLogin", (req, res) => {
+  const inputId = req.query.inputId;
+  const inputPw = req.query.inputPw;
+  const query = `
+    SELECT *
+    FROM Customer
+    WHERE email = ? AND passwd = ?;
+    `;
 
-// 날짜 선택만으로 전체 차량 검색
-app.get("/allcar", (req, res) => {
+  db.query(query, [inputId, inputPw], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+    if (results.length === 1) {
+      // 쿼리 결과가 참인 경우, 로그인성공
+      res.json(results[0]);
+    } else {
+      // 로그인 실패
+      res.json(results[0]);
+    }
+  });
+});
+
+//날짜로만 찾는 렌터카
+app.get("/searchRentCar", (req, res) => {
   const startDate = req.query.startDate;
   const endDate = req.query.endDate;
 
   const query = `
-    SELECT rc.LICENSEPLATENO, cm.modelName, cm.vehicleType, cm.rentRatePerDay, cm.fuel, cm.numberOfSeats, GROUP_CONCAT(op.optionName SEPARATOR ', ') AS options
-    FROM CarModel cm
-    LEFT JOIN RentCar rc ON cm.modelName = rc.modelName
-    LEFT JOIN Options op ON rc.licensePlateNo = op.licensePlateNo
-    WHERE rc.licensePlateNo IS NULL OR (rc.licensePlateNo NOT IN (
-        SELECT r.LICENSEPLATENO
+      SELECT cm.modelName, rc.licensePlateNo, cm.vehicleType, cm.fuel, cm.numberOfSeats, cm.rentRatePerDay, o.optionName
+      FROM CarModel cm
+      JOIN RentCar rc ON cm.modelName = rc.modelName
+      LEFT JOIN Options o ON rc.licensePlateNo = o.licensePlateNo
+      WHERE rc.licensePlateNo NOT IN (
+        SELECT r.licensePlateNo
         FROM Reserve r
-        WHERE r.startDate <= ? AND r.endDate >= ?
-      )
-    )
-    GROUP BY rc.LICENSEPLATENO;
-  `;
+        WHERE (r.startDate <= ? AND r.endDate >= ?)
+      );
+    `;
 
   db.query(query, [endDate, startDate], (err, results) => {
     if (err) {
@@ -38,98 +61,31 @@ app.get("/allcar", (req, res) => {
   });
 });
 
-// 날짜 선택, 차종 선택 검색
-app.get("/selecttype", (req, res) => {
+//날짜&&차종으로 찾는 렌터카
+app.get("/searchRentCarOps", (req, res) => {
   const startDate = req.query.startDate;
   const endDate = req.query.endDate;
   const vehicleType = req.query.vehicleType.split(",");
 
   const query = `
-  SELECT rc.LICENSEPLATENO, cm.modelName, cm.vehicleType, cm.rentRatePerDay, cm.fuel, cm.numberOfSeats, GROUP_CONCAT(op.optionName SEPARATOR ', ') AS options
-  FROM CarModel cm
-  LEFT JOIN RentCar rc ON cm.modelName = rc.modelName
-  LEFT JOIN Options op ON rc.licensePlateNo = op.licensePlateNo
-  WHERE rc.licensePlateNo IS NULL OR (rc.licensePlateNo NOT IN (
-      SELECT r.LICENSEPLATENO
-      FROM Reserve r
-      WHERE r.startDate <= ? AND r.endDate >= ?
-  )
-)
-AND cm.vehicleType IN (?) 
-GROUP BY rc.LICENSEPLATENO, cm.modelName, cm.vehicleType, cm.rentRatePerDay, cm.fuel, cm.numberOfSeats;
-
-  `;
+        SELECT cm.modelName, rc.licensePlateNo, cm.vehicleType, cm.fuel, cm.numberOfSeats, cm.rentRatePerDay, o.optionName
+        FROM CarModel cm
+        JOIN RentCar rc ON cm.modelName = rc.modelName
+        LEFT JOIN Options o ON rc.licensePlateNo = o.licensePlateNo
+        WHERE rc.licensePlateNo NOT IN (
+          SELECT r.licensePlateNo
+          FROM Reserve r
+          WHERE (r.startDate <= ? AND r.endDate >= ?)
+        )
+        AND cm.vehicleType IN (?);
+      `;
 
   db.query(query, [endDate, startDate, vehicleType], (err, results) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
       return;
-    } else {
-      res.json(results);
     }
-  });
-});
-
-// 로그인
-app.post("/onLogin", (req, res) => {
-  const inputId = req.query.inputId;
-  const inputPw = req.query.inputPw;
-  const query = `
-  SELECT *
-  FROM Customer
-  WHERE email = ? AND passwd = ?;
-  `;
-
-  db.query(query, [inputId, inputPw], (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
-      return;
-    }
-
-    if (results.length === 1) {
-      // 쿼리 결과가 참인 경우
-      // res.json({ success: "Login successful" });
-      res.json(results[0]);
-      // console.log(inputId, inputPw);
-      // console.log("로그인 성공");
-    } else {
-      // 쿼리 결과가 거짓인 경우
-      res.json(results[0]);
-      // console.log(inputId, inputPw);
-      // console.log("로그인 실패");
-    }
-  });
-});
-
-// 예약 내역
-app.get("/reserveList", (req, res) => {
-  const userName = req.query.name;
-
-  const query = `
-    SELECT
-      rc.modelName,
-      rc.licensePlateNo,
-      rs.startDate,
-      rs.endDate
-    FROM
-      Reserve rs
-    JOIN
-      RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
-    JOIN
-      Customer c ON rs.cno = c.cno
-    WHERE
-      c.name = ? AND rs.startDate > CURDATE()
-  `;
-
-  db.query(query, [userName], (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
-      return;
-    }
-
     res.json(results);
   });
 });
@@ -143,15 +99,15 @@ app.get("/reserve", (req, res) => {
   const customerName = req.query.name;
 
   const query = `
-    INSERT INTO Reserve (licensePlateNo, startDate, reserveDate, endDate, cno)
-    VALUES (
-      ?,
-      ?,
-      ?,
-      ?,
-      (SELECT cno FROM Customer WHERE name = ?)
-    );
-  `;
+      INSERT INTO Reserve (licensePlateNo, startDate, reserveDate, endDate, cno)
+      VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        (SELECT cno FROM Customer WHERE name = ?)
+      );
+    `;
 
   db.query(
     query,
@@ -162,11 +118,100 @@ app.get("/reserve", (req, res) => {
         res.status(500).json({ error: "Internal server error" });
         return;
       }
-
       res.json({ message: "Reservation created successfully" });
-      // console.log(result);
     }
   );
+});
+
+// 예약 후 RentCar 테이블 갱신
+app.get("/updateRentCar", (req, res) => {
+  const licensePlateNo = req.query.licensePlateNo;
+  const userName = req.query.userName;
+
+  // 사용자 이름과 licensePlateNo에 따른 RentCar 테이블과 Reserve 테이블 업데이트 또는 삽입
+  const updateRentCarQuery = `
+    INSERT INTO RentCar (LICENSEPLATENO, modelName, dateRented, dateDue, cno)
+    SELECT rc.LICENSEPLATENO, cm.modelName, rv.startDate, rv.endDate, rv.CNO
+    FROM RentCar AS rc
+    JOIN Reserve AS rv ON rc.LICENSEPLATENO = rv.LICENSEPLATENO
+    JOIN Customer AS c ON c.cno = rv.CNO
+    JOIN CarModel AS cm ON cm.modelName = rc.modelName
+    WHERE c.name = ?
+      AND rc.LICENSEPLATENO = ?
+    ON DUPLICATE KEY UPDATE
+      dateRented = VALUES(dateRented),
+      dateDue = VALUES(dateDue),
+      cno = VALUES(cno);
+    `;
+
+  db.query(updateRentCarQuery, [userName, licensePlateNo], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+    res.json({
+      message: "RentCar and Reserve updated or inserted successfully",
+    });
+  });
+});
+
+app.get("/updateDeleteRentCar", (req, res) => {
+  const licensePlateNo = req.query.licensePlateNo;
+  const userName = req.query.userName;
+
+  // 사용자 이름과 licensePlateNo에 따른 RentCar 테이블 업데이트
+  const updateRentCarQuery = `
+      UPDATE RentCar AS rc
+      JOIN Customer AS c ON c.cno = rc.cno
+      SET rc.dateRented = NULL,
+          rc.dateDue = NULL,
+          rc.cno = NULL
+      WHERE c.name = ? AND rc.LICENSEPLATENO = ?;
+    `;
+
+  db.query(updateRentCarQuery, [userName, licensePlateNo], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+
+    res.json({ message: "RentCar table updated successfully" });
+  });
+});
+
+// 예약 내역
+app.get("/reserveList", (req, res) => {
+  const userName = req.query.name;
+
+  const query = `
+      SELECT
+        rc.modelName,
+        rc.licensePlateNo,
+        rs.startDate,
+        rs.endDate
+      FROM
+        Reserve rs
+      JOIN
+        RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
+      JOIN
+        Customer c ON rs.cno = c.cno
+      WHERE
+        c.name = ? AND rs.startDate > CURDATE()
+      ORDER BY
+      rs.startDate DESC;
+    `;
+
+  db.query(query, [userName], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+
+    res.json(results);
+  });
 });
 
 // 예약 취소
@@ -176,15 +221,15 @@ app.get("/cancelReserve", (req, res) => {
   const customerName = req.query.name;
 
   const query = `
-    DELETE FROM Reserve
-    WHERE licensePlateNo = ? 
-    AND startDate = ?
-    AND cno = (
-      SELECT cno
-      FROM Customer
-      WHERE name = ?
-    );
-  `;
+      DELETE FROM Reserve
+      WHERE licensePlateNo = ? 
+      AND startDate = ?
+      AND cno = (
+        SELECT cno
+        FROM Customer
+        WHERE name = ?
+      );
+    `;
 
   db.query(query, [licensePlateNo, startDate, customerName], (err, result) => {
     if (err) {
@@ -206,26 +251,26 @@ app.get("/rentalList", (req, res) => {
   const userName = req.query.name;
 
   const query = `
-    SELECT
-      cm.modelName,
-      rc.licensePlateNo,
-      rs.startDate,
-      rs.endDate,
-      (DATEDIFF(CURDATE(), rs.startDate)+1) * cm.rentRatePerDay AS rentRatePerDayAccumulated1,
-      (DATEDIFF(rs.endDate, rs.startDate)+1) * cm.rentRatePerDay AS rentRatePerDayAccumulated2
-    FROM
-      Customer c
-    JOIN
-      Reserve rs ON c.cno = rs.cno
-    JOIN
-      RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
-    JOIN
-      CarModel cm ON rc.modelName = cm.modelName
-    WHERE
-      c.name = ? AND rs.startDate <= CURDATE()
-    ORDER BY
-      rs.startDate DESC;
-  `;
+      SELECT
+        cm.modelName,
+        rc.licensePlateNo,
+        rs.startDate,
+        rs.endDate,
+        (DATEDIFF(CURDATE(), rs.startDate)+1) * cm.rentRatePerDay AS rentRatePerDayAccumulated1,
+        (DATEDIFF(rs.endDate, rs.startDate)+1) * cm.rentRatePerDay AS rentRatePerDayAccumulated2
+      FROM
+        Customer c
+      JOIN
+        Reserve rs ON c.cno = rs.cno
+      JOIN
+        RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
+      JOIN
+        CarModel cm ON rc.modelName = cm.modelName
+      WHERE
+        c.name = ? AND rs.startDate <= CURDATE()
+      ORDER BY
+        rs.startDate DESC;
+    `;
 
   db.query(query, [userName], (err, results) => {
     if (err) {
@@ -242,24 +287,24 @@ app.get("/rentalBeforeList", (req, res) => {
   const userName = req.query.name;
 
   const query = `
-    SELECT
-      c.name,
-      rc.modelName,
-      rc.licensePlateNo,
-      pr.dateRented,
-      pr.dateReturned,
-      pr.payment
-    FROM
-      Customer c
-    JOIN
-      PreviousRental pr ON c.cno = pr.cno
-    JOIN
-      RentCar rc ON pr.licensePlateNo = rc.licensePlateNo
-    WHERE
-      c.name = ? 
-    ORDER BY
-      pr.dateRented DESC;
-  `;
+      SELECT
+        c.name,
+        rc.modelName,
+        rc.licensePlateNo,
+        pr.dateRented,
+        pr.dateReturned,
+        pr.payment
+      FROM
+        Customer c
+      JOIN
+        PreviousRental pr ON c.cno = pr.cno
+      JOIN
+        RentCar rc ON pr.licensePlateNo = rc.licensePlateNo
+      WHERE
+        c.name = ? 
+      ORDER BY
+        pr.dateRented DESC;
+    `;
 
   db.query(query, [userName], (err, results) => {
     if (err) {
@@ -272,78 +317,16 @@ app.get("/rentalBeforeList", (req, res) => {
   });
 });
 
-//결제(반납)
-// app.get("/onPay", (req, res) => {
-//   const userName = req.query.name;
-//   const paymentValue = req.query.payment;
-//   const licensePlateNo = req.query.licensePlateNo;
-
-//   const query = `
-//     INSERT INTO PreviousRental (licensePlateNo, dateRented, dateReturned, payment, cno)
-//     SELECT rc.licensePlateNo, rs.startDate, rs.endDate, ?, c.cno
-//     FROM Customer c
-//     JOIN Reserve rs ON c.cno = rs.cno
-//     JOIN RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
-//     WHERE c.name = ?
-//     ${licensePlateNo ? "AND rc.licensePlateNo = ?" : ""};
-//   `;
-
-//   const queryParams = [paymentValue, userName];
-//   if (licensePlateNo) {
-//     queryParams.push(licensePlateNo);
-//   }
-
-//   db.query(query, queryParams, (err, results) => {
-//     if (err) {
-//       console.error(err);
-//       res.status(500).json({ error: "Internal server error" });
-//       return;
-//     }
-
-//     res.json(results);
-//   });
-// });
-app.get("/onPay", (req, res) => {
-  const userName = req.query.name;
-  const paymentValue = req.query.payment;
-  const licensePlateNo = req.query.licensePlateNo;
-
-  const query = `
-    INSERT INTO PreviousRental (licensePlateNo, dateRented, dateReturned, payment, cno)
-    SELECT rc.licensePlateNo, rs.startDate, CURDATE(), ?, c.cno
-    FROM Customer c
-    JOIN Reserve rs ON c.cno = rs.cno
-    JOIN RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
-    WHERE c.name = ?
-    ${licensePlateNo ? "AND rc.licensePlateNo = ?" : ""}
-    ON DUPLICATE KEY UPDATE payment = VALUES(payment);`;
-
-  const queryParams = [paymentValue, userName];
-  if (licensePlateNo) {
-    queryParams.push(licensePlateNo);
-  }
-
-  db.query(query, queryParams, (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
-      return;
-    }
-
-    res.json(results);
-  });
-});
-
 //관리자 질의 1
 app.get("/man1", (req, res) => {
   const query = `
-    SELECT C.CNO, C.NAME, COUNT(DISTINCT P.LICENSEPLATENO) + COUNT(DISTINCT R.LICENSEPLATENO) AS TotalCount
-    FROM Customer C
-    LEFT JOIN PreviousRental P ON C.CNO = P.CNO
-    LEFT JOIN Reserve R ON C.CNO = R.CNO
-    GROUP BY C.CNO, C.NAME
-    ORDER BY TotalCount DESC;
-  `;
+      SELECT C.CNO, C.NAME, COUNT(DISTINCT P.LICENSEPLATENO) + COUNT(DISTINCT R.LICENSEPLATENO) AS TotalCount
+      FROM Customer C
+      LEFT JOIN PreviousRental P ON C.CNO = P.CNO
+      LEFT JOIN Reserve R ON C.CNO = R.CNO
+      GROUP BY C.CNO, C.NAME
+      ORDER BY TotalCount DESC;
+    `;
 
   db.query(query, (err, results) => {
     if (err) {
@@ -359,18 +342,18 @@ app.get("/man1", (req, res) => {
 //관리자 잘의 2
 app.get("/man2", (req, res) => {
   const query = `
-    SELECT LICENSEPLATENO, COUNT(*) AS RENTAL_COUNT
-    FROM (
-      SELECT LICENSEPLATENO
-      FROM PreviousRental
-      UNION ALL
-      SELECT LICENSEPLATENO
-      FROM Reserve
-    ) AS subquery
-    GROUP BY LICENSEPLATENO WITH ROLLUP
-    HAVING LICENSEPLATENO IS NOT NULL
-    ORDER BY RENTAL_COUNT DESC;
-  `;
+      SELECT LICENSEPLATENO, COUNT(*) AS RENTAL_COUNT
+      FROM (
+        SELECT LICENSEPLATENO
+        FROM PreviousRental
+        UNION ALL
+        SELECT LICENSEPLATENO
+        FROM Reserve
+      ) AS subquery
+      GROUP BY LICENSEPLATENO WITH ROLLUP
+      HAVING LICENSEPLATENO IS NOT NULL
+      ORDER BY RENTAL_COUNT DESC;
+    `;
 
   db.query(query, (err, results) => {
     if (err) {
@@ -386,22 +369,22 @@ app.get("/man2", (req, res) => {
 //관리자 질의 3
 app.get("/man3", (req, res) => {
   const query = `
-    SELECT c.CNO, c.NAME, c.EMAIL,
-           r.LICENSEPLATENO, r.STARTDATE, r.RESERVEDATE, r.ENDDATE
-    FROM (
-      SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO,
-             ROW_NUMBER() OVER (PARTITION BY LICENSEPLATENO ORDER BY STARTDATE DESC) AS RN
+      SELECT c.CNO, c.NAME, c.EMAIL,
+             r.LICENSEPLATENO, r.STARTDATE, r.RESERVEDATE, r.ENDDATE
       FROM (
-        SELECT LICENSEPLATENO, DATERENTED AS STARTDATE, DATERENTED AS RESERVEDATE, DATERETURNED AS ENDDATE, CNO
-        FROM PreviousRental
-        UNION ALL
-        SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO
-        FROM Reserve
-      ) AS subquery
-    ) AS r
-    JOIN Customer c ON r.CNO = c.CNO
-    WHERE r.RN = 1;
-  `;
+        SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO,
+               ROW_NUMBER() OVER (PARTITION BY LICENSEPLATENO ORDER BY STARTDATE DESC) AS RN
+        FROM (
+          SELECT LICENSEPLATENO, DATERENTED AS STARTDATE, DATERENTED AS RESERVEDATE, DATERETURNED AS ENDDATE, CNO
+          FROM PreviousRental
+          UNION ALL
+          SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO
+          FROM Reserve
+        ) AS subquery
+      ) AS r
+      JOIN Customer c ON r.CNO = c.CNO
+      WHERE r.RN = 1;
+    `;
 
   db.query(query, (err, results) => {
     if (err) {
@@ -419,10 +402,10 @@ app.get("/getEmail", (req, res) => {
   const userName = req.query.name;
 
   const query = `
-    SELECT email
-    FROM Customer
-    WHERE name = ?;
-  `;
+      SELECT email
+      FROM Customer
+      WHERE name = ?;
+    `;
 
   db.query(query, [userName], (err, results) => {
     if (err) {
