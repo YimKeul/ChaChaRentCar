@@ -135,20 +135,22 @@ const Manager = () => {
               내림차순으로 정렬
             </Cfonts>
             <S.table style={{ marginTop: "20px" }}>
-              <S.tableRow>
-                <S.tableHeader>고유 아이디</S.tableHeader>
-                <S.tableHeader>이름</S.tableHeader>
-                <S.tableHeader>총 횟수</S.tableHeader>
-              </S.tableRow>
+              <tbody>
+                <S.tableRow>
+                  <S.tableHeader>고유 아이디</S.tableHeader>
+                  <S.tableHeader>이름</S.tableHeader>
+                  <S.tableHeader>총 횟수</S.tableHeader>
+                </S.tableRow>
 
-              {man1 &&
-                man1.map((data, index) => (
-                  <S.tableRow key={index}>
-                    <S.tableData>{data.CNO}</S.tableData>
-                    <S.tableData>{data.NAME}</S.tableData>
-                    <S.tableData>{data.TotalCount}</S.tableData>
-                  </S.tableRow>
-                ))}
+                {man1 &&
+                  man1.map((data, index) => (
+                    <S.tableRow key={index}>
+                      <S.tableData>{data.CNO}</S.tableData>
+                      <S.tableData>{data.NAME}</S.tableData>
+                      <S.tableData>{data.TotalCount}</S.tableData>
+                    </S.tableRow>
+                  ))}
+              </tbody>
             </S.table>
           </S.listBox>
         )}
@@ -159,17 +161,19 @@ const Manager = () => {
               가장 많이 빌린 렌터카의 차 번호 내림차순 정렬
             </Cfonts>
             <S.table style={{ marginTop: "20px" }}>
-              <S.tableRow>
-                <S.tableHeader>차량 번호</S.tableHeader>
-                <S.tableHeader>총 횟수</S.tableHeader>
-              </S.tableRow>
-              {man2 &&
-                man2.map((data, index) => (
-                  <S.tableRow key={index}>
-                    <S.tableData>{data.LICENSEPLATENO}</S.tableData>
-                    <S.tableData>{data.RENTAL_COUNT}</S.tableData>
-                  </S.tableRow>
-                ))}
+              <tbody>
+                <S.tableRow>
+                  <S.tableHeader>차량 번호</S.tableHeader>
+                  <S.tableHeader>총 횟수</S.tableHeader>
+                </S.tableRow>
+                {man2 &&
+                  man2.map((data, index) => (
+                    <S.tableRow key={index}>
+                      <S.tableData>{data.LICENSEPLATENO}</S.tableData>
+                      <S.tableData>{data.RENTAL_COUNT}</S.tableData>
+                    </S.tableRow>
+                  ))}
+              </tbody>
             </S.table>
           </S.listBox>
         )}
@@ -179,31 +183,35 @@ const Manager = () => {
               윈도우 함수를 사용하 각 차량별 최근 대여 및 예약자 정보
             </Cfonts>
             <S.table style={{ marginTop: "20px" }}>
-              <S.tableRow>
-                <S.tableHeader>차량 번호</S.tableHeader>
-                <S.tableHeader>고유 아이디</S.tableHeader>
-                <S.tableHeader>이름</S.tableHeader>
-                <S.tableHeader>이메일</S.tableHeader>
-                <S.tableHeader>예약일</S.tableHeader>
-                <S.tableHeader>대여일</S.tableHeader>
-                <S.tableHeader>종료일</S.tableHeader>
-              </S.tableRow>
-              {man3 &&
-                man3.map((data, index) => (
-                  <S.tableRow key={index}>
-                    <S.tableData>{data.LICENSEPLATENO}</S.tableData>
-                    <S.tableData>{data.CNO}</S.tableData>
-                    <S.tableData>{data.NAME}</S.tableData>
-                    <S.tableData>{data.EMAIL}</S.tableData>
-                    <S.tableData>
-                      {convertDateFormat(data.RESERVEDATE)}
-                    </S.tableData>
-                    <S.tableData>
-                      {convertDateFormat(data.STARTDATE)}
-                    </S.tableData>
-                    <S.tableData>{convertDateFormat(data.ENDDATE)}</S.tableData>
-                  </S.tableRow>
-                ))}
+              <tbody>
+                <S.tableRow>
+                  <S.tableHeader>차량 번호</S.tableHeader>
+                  <S.tableHeader>고유 아이디</S.tableHeader>
+                  <S.tableHeader>이름</S.tableHeader>
+                  <S.tableHeader>이메일</S.tableHeader>
+                  <S.tableHeader>예약일</S.tableHeader>
+                  <S.tableHeader>대여일</S.tableHeader>
+                  <S.tableHeader>종료일</S.tableHeader>
+                </S.tableRow>
+                {man3 &&
+                  man3.map((data, index) => (
+                    <S.tableRow key={index}>
+                      <S.tableData>{data.LICENSEPLATENO}</S.tableData>
+                      <S.tableData>{data.CNO}</S.tableData>
+                      <S.tableData>{data.NAME}</S.tableData>
+                      <S.tableData>{data.EMAIL}</S.tableData>
+                      <S.tableData>
+                        {convertDateFormat(data.RESERVEDATE)}
+                      </S.tableData>
+                      <S.tableData>
+                        {convertDateFormat(data.STARTDATE)}
+                      </S.tableData>
+                      <S.tableData>
+                        {convertDateFormat(data.ENDDATE)}
+                      </S.tableData>
+                    </S.tableRow>
+                  ))}
+              </tbody>
             </S.table>
           </S.listBox>
         )}

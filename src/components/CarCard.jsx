@@ -15,7 +15,7 @@ const CarCard = ({
   type,
   fuel,
   numberOfSeats,
-  LICENSEPLATENO,
+  licensePlateNo,
   rentRatePerDay,
   options,
   startDate,
@@ -29,7 +29,7 @@ const CarCard = ({
   const reserve = () => {
     axios
       .get(
-        `/reserve?licensePlateNo=${LICENSEPLATENO}&startDate=${convertDateFormat(
+        `/reserve?licensePlateNo=${licensePlateNo}&startDate=${convertDateFormat(
           startDate
         )}&reserveDate=${convertDateFormat(
           new Date()
@@ -37,20 +37,29 @@ const CarCard = ({
     `
       )
       .then((response) => {
-        // setData(response.data);
         console.log(response.data);
       })
       .catch((error) => {
         console.error(error);
       });
-    document.location.href = "/reserve";
+  };
+
+  const update = () => {
+    axios
+      .get(`/updateRentCar?licensePlateNo=${licensePlateNo}&userName=${isUser}`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (
     <S.container>
       <S.cardBox>
         <S.imgBox>
-          <S.img src={carimg} alt="santafe" />
+          <S.img src={carimg} alt="사진" />
         </S.imgBox>
         <S.textBox>
           <S.leftArea>
@@ -64,8 +73,16 @@ const CarCard = ({
           </S.leftArea>
           <S.rightArea>
             <S.reserveBtn
-              onClick={() => {
-                reserve();
+              onClick={async () => {
+                try {
+                  await reserve();
+                  console.log("reserve");
+                  await update();
+                  console.log("update");
+                  document.location.href = "/reserve";
+                } catch (error) {
+                  console.log(error);
+                }
               }}
             >
               <Cfonts size={30} color="white">
