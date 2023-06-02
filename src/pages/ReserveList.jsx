@@ -38,66 +38,70 @@ const ReserveList = () => {
         <Cfonts size={30}>예약 내역</Cfonts>
         <S.listBox>
           <S.table>
-            <S.tableRow>
-              <S.tableHeader>모델명</S.tableHeader>
-              <S.tableHeader>차량 번호</S.tableHeader>
-              <S.tableHeader>대여 날짜</S.tableHeader>
-              <S.tableHeader>반납 예정일</S.tableHeader>
-              <S.tableHeader>취소</S.tableHeader>
-            </S.tableRow>
-            {data &&
-              data.map((car, index) => (
-                <S.tableRow key={index}>
-                  <S.tableData>{car.modelName}</S.tableData>
-                  <S.tableData>{car.licensePlateNo}</S.tableData>
-                  <S.tableData>{convertDateFormat(car.startDate)}</S.tableData>
-                  <S.tableData>{convertDateFormat(car.endDate)}</S.tableData>
-                  <S.tableData>
-                    <S.area>
-                      <S.deletebtn
-                        onClick={async () => {
-                          try {
-                            await axios
-                              .get(
-                                `/cancelReserve?licensePlateNo=${
-                                  car.licensePlateNo
-                                }&startDate=${convertDateFormat(
-                                  car.startDate
-                                )}&name=${isUser}`
-                              )
-                              .then((response) => {
-                                console.log(response.data);
-                              })
-                              .catch((error) => {
-                                console.error(error);
-                              });
-                            console.log("cancelReserve");
+            <tbody>
+              <S.tableRow>
+                <S.tableHeader>모델명</S.tableHeader>
+                <S.tableHeader>차량 번호</S.tableHeader>
+                <S.tableHeader>대여 날짜</S.tableHeader>
+                <S.tableHeader>반납 예정일</S.tableHeader>
+                <S.tableHeader>취소</S.tableHeader>
+              </S.tableRow>
+              {data &&
+                data.map((car, index) => (
+                  <S.tableRow key={index}>
+                    <S.tableData>{car.modelName}</S.tableData>
+                    <S.tableData>{car.licensePlateNo}</S.tableData>
+                    <S.tableData>
+                      {convertDateFormat(car.startDate)}
+                    </S.tableData>
+                    <S.tableData>{convertDateFormat(car.endDate)}</S.tableData>
+                    <S.tableData>
+                      <S.area>
+                        <S.deletebtn
+                          onClick={async () => {
+                            try {
+                              await axios
+                                .get(
+                                  `/cancelReserve?licensePlateNo=${
+                                    car.licensePlateNo
+                                  }&startDate=${convertDateFormat(
+                                    car.startDate
+                                  )}&name=${isUser}`
+                                )
+                                .then((response) => {
+                                  console.log(response.data);
+                                })
+                                .catch((error) => {
+                                  console.error(error);
+                                });
+                              console.log("cancelReserve");
 
-                            await axios
-                              .get(
-                                `/updateDeleteRentCar?licensePlateNo=${car.licensePlateNo}&userName=${isUser}`
-                              )
-                              .then((response) => {
-                                console.log(response.data);
-                              })
-                              .catch((error) => {
-                                console.error(error);
-                              });
-                            console.log("updateRentcar");
-                          } catch (error) {
-                            console.log(error);
-                          }
-                          // document.location.href = "/myreserve";
-                        }}
-                      >
-                        <Cfonts size={10} color="white">
-                          취소
-                        </Cfonts>
-                      </S.deletebtn>
-                    </S.area>
-                  </S.tableData>
-                </S.tableRow>
-              ))}
+                              await axios
+                                .get(
+                                  `/updateDeleteRentCar?licensePlateNo=${car.licensePlateNo}`
+                                )
+                                .then((response) => {
+                                  console.log(response.data);
+                                })
+                                .catch((error) => {
+                                  console.error(error);
+                                });
+                              console.log("updateRentcar");
+                            } catch (error) {
+                              console.log(error);
+                            }
+                            document.location.href = "/myreserve";
+                          }}
+                        >
+                          <Cfonts size={10} color="white">
+                            취소
+                          </Cfonts>
+                        </S.deletebtn>
+                      </S.area>
+                    </S.tableData>
+                  </S.tableRow>
+                ))}
+            </tbody>
           </S.table>
         </S.listBox>
       </S.container>

@@ -16,7 +16,7 @@ const RentalList = () => {
   const [isUser, setUser] = useState();
   const [data, setData] = useState();
   const [beforeData, setBeforeData] = useState();
-  const [email, getEmail] = useState();
+  const [isemail, setEmail] = useState();
 
   const handleList = () => {
     isNowRent(!nowRent);
@@ -24,35 +24,25 @@ const RentalList = () => {
 
   useEffect(() => {
     setUser(sessionStorage.getItem("userId"));
+    setEmail(sessionStorage.getItem("userEmail"));
     axios
       .get(`/rentalList?name=${isUser}`)
       .then((response) => {
         setData(response.data);
-        // console.log(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-    axios
-      .get(`/rentalBeforeList?name=${isUser}`)
-      .then((response) => {
-        setBeforeData(response.data);
-        // console.log(response.data);
       })
       .catch((error) => {
         console.error(error);
       });
 
     axios
-      .get(`/getEmail?name=${isUser}`)
+      .get(`/rentalBeforeList?name=${isUser}`)
       .then((response) => {
-        getEmail(response.data[0].email);
+        setBeforeData(response.data);
       })
       .catch((error) => {
         console.error(error);
       });
-  }, [isUser, email]);
-  // useEffect(() => {}, [email, isUser]);
+  }, [isUser, isemail]);
 
   return (
     <S.out>
@@ -89,117 +79,125 @@ const RentalList = () => {
         {nowRent ? (
           <S.listBox>
             <S.table>
-              <S.tableRow>
-                <S.tableHeader>모델명</S.tableHeader>
-                <S.tableHeader>차량번호</S.tableHeader>
-                <S.tableHeader>대여 날짜</S.tableHeader>
-                <S.tableHeader>반납 예정일</S.tableHeader>
-                <S.tableHeader>
-                  예상 결제 금액
-                  <br />
-                  (금일 / 계약일)
-                </S.tableHeader>
-                <S.tableHeader>결제</S.tableHeader>
-              </S.tableRow>
-              {/*  */}
-              {data &&
-                data.map((car, index) => (
-                  <S.tableRow key={index}>
-                    <S.tableData>{car.modelName}</S.tableData>
-                    <S.tableData>{car.licensePlateNo}</S.tableData>
-                    <S.tableData>
-                      {convertDateFormat(car.startDate)}
-                    </S.tableData>
-                    <S.tableData>{convertDateFormat(car.endDate)}</S.tableData>
-                    <S.tableData>
-                      {car.rentRatePerDayAccumulated1}원 /{" "}
-                      {car.rentRatePerDayAccumulated2}원
-                    </S.tableData>
-                    <S.tableData>
-                      <S.area>
-                        <S.returnbtn
-                          onClick={async () => {
-                            try {
-                              await axios.get(
-                                `/onPay?name=${isUser}&payment=${car.rentRatePerDayAccumulated1}&licensePlateNo=${car.licensePlateNo}`
-                              );
-                              await axios.get(
-                                `/cancelReserve?licensePlateNo=${
-                                  car.licensePlateNo
-                                }&startDate=${convertDateFormat(
-                                  car.startDate
-                                )}&name=${isUser}`
-                              );
-                              await emailjs
-                                .send(
-                                  "service_se1yive",
-                                  "template_qslwsnm",
-                                  {
-                                    name: isUser,
-                                    modelName: car.modelName,
-                                    dateReturned: convertDateFormat(new Date()),
-                                    payment:
-                                      car.rentRatePerDayAccumulated1.toString(),
-                                    email: email,
-                                  },
-                                  "zD25jO1PgJcfnQ-YV"
-                                )
-                                .then(
-                                  (result) => {
-                                    console.log(result.text);
-                                  },
-                                  (error) => {
-                                    console.log(error.text);
-                                  }
-                                );
-                              document.location.href = "/myrental";
-                            } catch (error) {
-                              console.error(error);
-                            }
-                          }}
-                        >
-                          <Cfonts size={10} color="white">
-                            결제
-                          </Cfonts>
-                        </S.returnbtn>
-                      </S.area>
-                    </S.tableData>
-                  </S.tableRow>
-                ))}
+              <tbody>
+                <S.tableRow>
+                  <S.tableHeader>모델명</S.tableHeader>
+                  <S.tableHeader>차량번호</S.tableHeader>
+                  <S.tableHeader>대여 날짜</S.tableHeader>
+                  <S.tableHeader>반납 예정일</S.tableHeader>
+                  <S.tableHeader>
+                    예상 결제 금액
+                    <br />
+                    (금일 / 계약일)
+                  </S.tableHeader>
+                  <S.tableHeader>결제</S.tableHeader>
+                </S.tableRow>
 
+                {/*  */}
+                {data &&
+                  data.map((car, index) => (
+                    <S.tableRow key={index}>
+                      <S.tableData>{car.modelName}</S.tableData>
+                      <S.tableData>{car.licensePlateNo}</S.tableData>
+                      <S.tableData>
+                        {convertDateFormat(car.startDate)}
+                      </S.tableData>
+                      <S.tableData>
+                        {convertDateFormat(car.endDate)}
+                      </S.tableData>
+                      <S.tableData>
+                        {car.rentRatePerDayAccumulated1}원 /{" "}
+                        {car.rentRatePerDayAccumulated2}원
+                      </S.tableData>
+                      <S.tableData>
+                        <S.area>
+                          <S.returnbtn
+                            onClick={async () => {
+                              try {
+                                await axios.get(
+                                  `/onPay?name=${isUser}&payment=${car.rentRatePerDayAccumulated1}&licensePlateNo=${car.licensePlateNo}`
+                                );
+                                await axios.get(
+                                  `/cancelReserve?licensePlateNo=${
+                                    car.licensePlateNo
+                                  }&startDate=${convertDateFormat(
+                                    car.startDate
+                                  )}&name=${isUser}`
+                                );
+                                await emailjs
+                                  .send(
+                                    "service_se1yive",
+                                    "template_qslwsnm",
+                                    {
+                                      name: isUser,
+                                      modelName: car.modelName,
+                                      dateReturned: convertDateFormat(
+                                        new Date()
+                                      ),
+                                      payment:
+                                        car.rentRatePerDayAccumulated1.toString(),
+                                      email: isemail,
+                                    },
+                                    "zD25jO1PgJcfnQ-YV"
+                                  )
+                                  .then(
+                                    (result) => {
+                                      console.log(result.text);
+                                    },
+                                    (error) => {
+                                      console.log(error.text);
+                                    }
+                                  );
+                                document.location.href = "/myrental";
+                              } catch (error) {
+                                console.error(error);
+                              }
+                            }}
+                          >
+                            <Cfonts size={10} color="white">
+                              결제
+                            </Cfonts>
+                          </S.returnbtn>
+                        </S.area>
+                      </S.tableData>
+                    </S.tableRow>
+                  ))}
+              </tbody>
               {/*  */}
             </S.table>
           </S.listBox>
         ) : (
           <S.listBox>
             <S.table>
-              <S.tableRow>
-                <S.tableHeader>모델명</S.tableHeader>
-                <S.tableHeader>차량번호</S.tableHeader>
-                <S.tableHeader>대여 날짜</S.tableHeader>
-                <S.tableHeader>반납 일</S.tableHeader>
-                <S.tableHeader>결제 금액</S.tableHeader>
-              </S.tableRow>
-              {/*  */}
+              <tbody>
+                <S.tableRow>
+                  <S.tableHeader>모델명</S.tableHeader>
+                  <S.tableHeader>차량번호</S.tableHeader>
+                  <S.tableHeader>대여 날짜</S.tableHeader>
+                  <S.tableHeader>반납 일</S.tableHeader>
+                  <S.tableHeader>결제 금액</S.tableHeader>
+                </S.tableRow>
+                {/*  */}
 
-              {beforeData &&
-                beforeData.map((car, index) => (
-                  <S.tableRow key={index}>
-                    <S.tableData>{car.modelName}</S.tableData>
-                    <S.tableData>{car.licensePlateNo}</S.tableData>
-                    <S.tableData>
-                      {convertDateFormat(car.dateRented)}
-                    </S.tableData>
-                    <S.tableData>
-                      {convertDateFormat(car.dateReturned)}
-                    </S.tableData>
-                    <S.tableData>{car.payment}원</S.tableData>
-                  </S.tableRow>
-                ))}
+                {beforeData &&
+                  beforeData.map((car, index) => (
+                    <S.tableRow key={index}>
+                      <S.tableData>{car.modelName}</S.tableData>
+                      <S.tableData>{car.licensePlateNo}</S.tableData>
+                      <S.tableData>
+                        {convertDateFormat(car.dateRented)}
+                      </S.tableData>
+                      <S.tableData>
+                        {convertDateFormat(car.dateReturned)}
+                      </S.tableData>
+                      <S.tableData>{car.payment}원</S.tableData>
+                    </S.tableRow>
+                  ))}
 
-              {/*  */}
+                {/*  */}
 
-              {/*  */}
+                {/*  */}
+              </tbody>
             </S.table>
           </S.listBox>
         )}

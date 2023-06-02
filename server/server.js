@@ -156,21 +156,20 @@ app.get("/updateRentCar", (req, res) => {
   });
 });
 
+//예약 취소후 렌트카 테이블 갱신
 app.get("/updateDeleteRentCar", (req, res) => {
   const licensePlateNo = req.query.licensePlateNo;
-  const userName = req.query.userName;
 
-  // 사용자 이름과 licensePlateNo에 따른 RentCar 테이블 업데이트
   const updateRentCarQuery = `
-      UPDATE RentCar AS rc
-      JOIN Customer AS c ON c.cno = rc.cno
-      SET rc.dateRented = NULL,
-          rc.dateDue = NULL,
-          rc.cno = NULL
-      WHERE c.name = ? AND rc.LICENSEPLATENO = ?;
-    `;
+    UPDATE RentCar AS rc
+    LEFT JOIN Reserve AS rv ON rc.LICENSEPLATENO = rv.LICENSEPLATENO
+    SET rc.dateRented = IF(rv.LICENSEPLATENO IS NOT NULL, rv.StartDate, NULL),
+        rc.dateDue = IF(rv.LICENSEPLATENO IS NOT NULL, rv.EndDate, NULL),
+        rc.cno = IF(rv.LICENSEPLATENO IS NOT NULL, rv.cno, NULL)
+    WHERE rc.LICENSEPLATENO = ?;
+  `;
 
-  db.query(updateRentCarQuery, [userName, licensePlateNo], (err, results) => {
+  db.query(updateRentCarQuery, [licensePlateNo], (err, results) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
@@ -317,6 +316,37 @@ app.get("/rentalBeforeList", (req, res) => {
   });
 });
 
+app.get("/onPay", (req, res) => {
+  const userName = req.query.name;
+  const paymentValue = req.query.payment;
+  const licensePlateNo = req.query.licensePlateNo;
+
+  const query = `
+    INSERT INTO PreviousRental (licensePlateNo, dateRented, dateReturned, payment, cno)
+    SELECT rc.licensePlateNo, rs.startDate, CURDATE(), ?, c.cno
+    FROM Customer c
+    JOIN Reserve rs ON c.cno = rs.cno
+    JOIN RentCar rc ON rs.licensePlateNo = rc.licensePlateNo
+    WHERE c.name = ?
+    ${licensePlateNo ? "AND rc.licensePlateNo = ?" : ""}
+    ON DUPLICATE KEY UPDATE payment = VALUES(payment);`;
+
+  const queryParams = [paymentValue, userName];
+  if (licensePlateNo) {
+    queryParams.push(licensePlateNo);
+  }
+
+  db.query(query, queryParams, (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+
+    res.json(results);
+  });
+});
+
 //관리자 질의 1
 app.get("/man1", (req, res) => {
   const query = `
@@ -398,24 +428,25 @@ app.get("/man3", (req, res) => {
 });
 
 //메일 보내기 작업용
-app.get("/getEmail", (req, res) => {
-  const userName = req.query.name;
+// app.get("/getEmail", (req, res) => {
+//   const userName = req.query.name;
 
-  const query = `
-      SELECT email
-      FROM Customer
-      WHERE name = ?;
-    `;
+//   const query = `
+//       SELECT email
+//       FROM Customer
+//       WHERE name = ?;
+//     `;
 
-  db.query(query, [userName], (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
-      return;
-    }
-    res.json(results);
-  });
-});
+//   db.query(query, [userName], (err, results) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).json({ error: "Internal server error" });
+//       return;
+//     }
+//     // console.log(results);
+//     res.json(results);
+//   });
+// });
 
 app.listen(PORT, () => {
   console.log(`Server On : http://localhost:${PORT}`);

@@ -2,13 +2,11 @@ import React, { useState } from "react";
 import { Header, Cfonts, LightGray, CnuBlue } from "../components";
 import styled from "styled-components";
 import { great } from "../images";
-import { Link } from "react-router-dom";
 import axios from "axios";
 const Login = () => {
   const [inputId, setInputId] = useState("");
   const [inputPw, setInputPw] = useState("");
 
-  // input data 의 변화가 있을 때마다 value 값을 변경해서 useState 해준다
   const handleInputId = (e) => {
     setInputId(e.target.value);
   };
@@ -32,13 +30,14 @@ const Login = () => {
           alert("회원정보가 없습니다");
         } else {
           sessionStorage.setItem("userId", res.data.name);
+          sessionStorage.setItem("userEmail", res.data.email);
+          if (res.data.name === "관리자") {
+            document.location.href = "/manager";
+          } else {
+            document.location.href = "/";
+          }
           // 작업 완료 되면 페이지 이동(새로고침)
-          document.location.href = "/";
         }
-
-        console.log("res.data.email :: ", res.data.email);
-        console.log("res.data.passwd :: ", res.data.passwd);
-        console.log("res.data.name :: ", res.data.name);
       })
       .catch();
   };
@@ -74,21 +73,9 @@ const Login = () => {
               로그인
             </Cfonts>
           </S.button>
-
-          <Cfonts>
-            관리자이신가요?
-            <Link to="/manager" style={{ textDecoration: "none" }}>
-              <span
-                style={{ cursor: "pointer", color: `${CnuBlue}` }}
-                onClick={() => {}}
-              >
-                관리자 페이지 이동하기
-              </span>
-            </Link>
-          </Cfonts>
         </S.formContainer>
         <S.imgBox>
-          <img src={great} alt="logo" />
+          <S.img src={great} alt="logo" />
         </S.imgBox>
       </S.row>
     </S.container>
@@ -134,8 +121,15 @@ const S = {
   `,
 
   imgBox: styled.div`
-    margin-top: 80px;
+    display: flex;
     flex: 1;
+    align-items: center;
+    justify-content: center;
+  `,
+  img: styled.img`
+    object-fit: contain;
+    width: 100%;
+    height: 45%;
   `,
 };
 
