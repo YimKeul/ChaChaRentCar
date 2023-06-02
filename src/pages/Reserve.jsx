@@ -75,6 +75,7 @@ const Reserve = () => {
   const [data, setData] = useState();
   useEffect(() => {
     searchRentCar();
+    console.log(data);
   }, []);
 
   const handleFilter = (button) => {
