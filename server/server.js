@@ -14,7 +14,7 @@ app.post("/onLogin", (req, res) => {
   const query = `
     SELECT *
     FROM Customer
-    WHERE email = ? AND passwd = ?;
+    WHERE cno = ? AND passwd = ?;
     `;
 
   db.query(query, [inputId, inputPw], (err, results) => {

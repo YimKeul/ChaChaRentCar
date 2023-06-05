@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Header, Cfonts, LightGray, CnuBlue } from "../components";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 import { great } from "../images";
 import axios from "axios";
 const Login = () => {
@@ -26,16 +27,13 @@ const Login = () => {
       })
       .then((res) => {
         console.log(res);
-        if (res.data.email === undefined) {
+        if (res.data.cno === undefined) {
           alert("회원정보가 없습니다");
         } else {
           sessionStorage.setItem("userId", res.data.name);
+          sessionStorage.setItem("userCNO", res.data.cno);
           sessionStorage.setItem("userEmail", res.data.email);
-          if (res.data.name === "관리자") {
-            document.location.href = "/manager";
-          } else {
-            document.location.href = "/";
-          }
+          document.location.href = "/";
           // 작업 완료 되면 페이지 이동(새로고침)
         }
       })
@@ -73,6 +71,17 @@ const Login = () => {
               로그인
             </Cfonts>
           </S.button>
+          <Cfonts>
+            관리자이신가요?
+            <Link to="/manager" style={{ textDecoration: "none" }}>
+              <span
+                style={{ cursor: "pointer", color: `${CnuBlue}` }}
+                onClick={() => {}}
+              >
+                관리자 페이지 이동하기
+              </span>
+            </Link>
+          </Cfonts>
         </S.formContainer>
         <S.imgBox>
           <S.img src={great} alt="logo" />
