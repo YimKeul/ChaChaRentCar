@@ -131,6 +131,9 @@ const RentalList = () => {
                                     {
                                       name: isUser,
                                       modelName: car.modelName,
+                                      dateRented: convertDateFormat(
+                                        car.startDate
+                                      ),
                                       dateReturned: convertDateFormat(
                                         new Date()
                                       ),
