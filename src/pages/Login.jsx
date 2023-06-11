@@ -50,7 +50,7 @@ const Login = () => {
             <S.input
               type="text"
               id="id"
-              placeholder="이메일"
+              placeholder="아이디"
               onChange={handleInputId}
             />
           </S.inputGroup>
