@@ -74,6 +74,7 @@ const Reserve = () => {
   const [data, setData] = useState();
   useEffect(() => {
     searchRentCar();
+    // eslint-disable-next-line
   }, []);
 
   const handleFilter = (button) => {

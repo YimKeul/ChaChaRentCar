@@ -99,24 +99,6 @@ const CarCard = ({
                 </S.reserveBtn>
               </Link>
             )}
-
-            {/* <S.reserveBtn
-              onClick={async () => {
-                try {
-                  await reserve();
-                  console.log("reserve");
-                  await update();
-                  console.log("update");
-                  document.location.href = "/reserve";
-                } catch (error) {
-                  console.log(error);
-                }
-              }}
-            >
-              <Cfonts size={30} color="white">
-                예약하기
-              </Cfonts>
-            </S.reserveBtn> */}
           </S.rightArea>
         </S.textBox>
       </S.cardBox>
