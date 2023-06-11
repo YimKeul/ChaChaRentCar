@@ -12,7 +12,9 @@ import axios from "axios";
 import emailjs from "@emailjs/browser";
 
 const RentalList = () => {
+  // 대여목록, 이전 대여목록 스위치 변수
   const [nowRent, isNowRent] = useState(true);
+
   const [isUser, setUser] = useState();
   const [data, setData] = useState();
   const [beforeData, setBeforeData] = useState();
@@ -23,8 +25,12 @@ const RentalList = () => {
   };
 
   useEffect(() => {
+    // 사용자 id, email을 가져옴, 이메일은 메일 보낼때 사용
     setUser(sessionStorage.getItem("userId"));
     setEmail(sessionStorage.getItem("userEmail"));
+
+    // 대여 목록 조회 요청문
+    // 사용자 정보를 통해 조회
     axios
       .get(`/rentalList?name=${isUser}`)
       .then((response) => {
@@ -34,6 +40,8 @@ const RentalList = () => {
         console.error(error);
       });
 
+    // 이전 대여 목록 조회 요청문
+    // 사용자 정보를 통해 조회
     axios
       .get(`/rentalBeforeList?name=${isUser}`)
       .then((response) => {
@@ -49,7 +57,7 @@ const RentalList = () => {
       <Header />
       <S.container>
         {nowRent ? (
-          // 대여목록
+          // 대여목록인경우
           <S.row>
             <Cfonts size={30}>대여 목록</Cfonts>
             <span style={{ paddingInline: "16px" }} />
@@ -112,11 +120,14 @@ const RentalList = () => {
                       <S.tableData>
                         <S.area>
                           <S.returnbtn
+                            // 반납 버튼
                             onClick={async () => {
+                              //1) 이전 대여 목록에 클릭한 차량 저장
                               try {
                                 await axios.get(
                                   `/onPay?name=${isUser}&payment=${car.rentRatePerDayAccumulated1}&licensePlateNo=${car.licensePlateNo}`
                                 );
+                                //2) 예약 테이블에서 해당 데이터 삭제
                                 await axios.get(
                                   `/cancelReserve?licensePlateNo=${
                                     car.licensePlateNo
@@ -124,9 +135,11 @@ const RentalList = () => {
                                     car.startDate
                                   )}&name=${isUser}`
                                 );
+                                //3) RentCar 테이블 갱신
                                 await axios.get(
                                   `/updateDeleteRentCar?licensePlateNo=${car.licensePlateNo}`
                                 );
+                                // 4) 이메일 보내는 함수
                                 await emailjs
                                   .send(
                                     "service_se1yive",
@@ -173,6 +186,7 @@ const RentalList = () => {
             </S.table>
           </S.listBox>
         ) : (
+          // 이전 대여 목록인 경우
           <S.listBox>
             <S.table>
               <tbody>

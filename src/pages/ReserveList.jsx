@@ -15,8 +15,10 @@ const ReserveList = () => {
   const [data, setData] = useState();
 
   useEffect(() => {
+    // sessionStorage를 조회해 로그인 확인 및 회원 정보를 가져오는 코드
     setUser(sessionStorage.getItem("userId"));
 
+    // 회원 정보와 일치하는 내역 중 예약 정보 데이터를 가져오는 코드
     axios
       .get(
         `/reserveList?name=${isUser}
@@ -46,6 +48,7 @@ const ReserveList = () => {
                 <S.tableHeader>반납 예정일</S.tableHeader>
                 <S.tableHeader>취소</S.tableHeader>
               </S.tableRow>
+              {/* map함수를 통해 데이터 렌더링 */}
               {data &&
                 data.map((car, index) => (
                   <S.tableRow key={index}>
@@ -58,8 +61,10 @@ const ReserveList = () => {
                     <S.tableData>
                       <S.area>
                         <S.deletebtn
+                          // 예약 취소 버튼
                           onClick={async () => {
                             try {
+                              // 1) 차량 번호, 대여 시작 날짜, 사용자 이름을 입력으로 Reserve 테이블에 해당하는 예약 데이터 삭제
                               await axios
                                 .get(
                                   `/cancelReserve?licensePlateNo=${
@@ -75,7 +80,7 @@ const ReserveList = () => {
                                   console.error(error);
                                 });
                               console.log("cancelReserve");
-
+                              // 2) 차량 번호를 입력으로 Reserve RentCar테이블에 해당하는 예약 데이터 업데이트
                               await axios
                                 .get(
                                   `/updateDeleteRentCar?licensePlateNo=${car.licensePlateNo}`
@@ -90,6 +95,7 @@ const ReserveList = () => {
                             } catch (error) {
                               console.log(error);
                             }
+                            // 화면 새로고침으로 데이터 목록 갱신
                             document.location.href = "/myreserve";
                           }}
                         >

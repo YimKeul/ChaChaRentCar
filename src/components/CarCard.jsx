@@ -22,11 +22,14 @@ const CarCard = ({
   endDate,
 }) => {
   const [isUser, setUser] = useState();
+
+  // 사용자 정보 받아오는 코드
   useEffect(() => {
     setUser(sessionStorage.getItem("userId"));
   }, [isUser]);
 
   const reserve = () => {
+    // 예약을 하기위해 차량 번호, 시작 날짜, 종료날짜, 사용자 이름을 입력으로 예약 테이블에 차량 추가
     axios
       .get(
         `/reserve?licensePlateNo=${licensePlateNo}&startDate=${convertDateFormat(
@@ -45,6 +48,7 @@ const CarCard = ({
   };
 
   const update = () => {
+    // 예약 후 RentCar테이블도 차량번호와 사용자 이름에 따른 데이터 갱신
     axios
       .get(`/updateRentCar?licensePlateNo=${licensePlateNo}&userName=${isUser}`)
       .then((response) => {
@@ -73,8 +77,10 @@ const CarCard = ({
           </S.leftArea>
           <S.rightArea>
             {isUser !== null ? (
+              // 로그인이 되어 있는 경우
               <S.reserveBtn
                 onClick={async () => {
+                  // 예약 버튼 클릭시 , 예약, 테이블 업데이트 , 화면 새로고침을 순서대로 실행
                   try {
                     await reserve();
                     console.log("reserve");
@@ -91,6 +97,7 @@ const CarCard = ({
                 </Cfonts>
               </S.reserveBtn>
             ) : (
+              // 로그인이 안되어 있는 경우 로그인 페이지로 이동
               <Link to="/Login" style={{ textDecoration: "none" }}>
                 <S.reserveBtn onClick={() => {}}>
                   <Cfonts size={30} color="white">

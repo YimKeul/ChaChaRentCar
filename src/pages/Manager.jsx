@@ -10,15 +10,18 @@ import {
 import styled from "styled-components";
 import axios from "axios";
 const Manager = () => {
+  // 질의 3개를 제어하기 위한 변수
   const [showList, isShowList] = useState("1");
   const handleList = (type) => {
     isShowList(type);
   };
 
+  //질의 3개를 하나씩 각각 변수에 저장
   const [man1, setMan1] = useState();
   const [man2, setMan2] = useState();
   const [man3, setMan3] = useState();
   useEffect(() => {
+    // 1번 질의문 요청 코드
     axios
       .get(`/man1`)
       .then((response) => {
@@ -28,6 +31,7 @@ const Manager = () => {
       .catch((error) => {
         console.error(error);
       });
+    // 2번 질의문 요청 코드
     axios
       .get(`/man2`)
       .then((response) => {
@@ -37,6 +41,7 @@ const Manager = () => {
       .catch((error) => {
         console.error(error);
       });
+    // 3번 질의문 요청 코드
     axios
       .get(`/man3`)
       .then((response) => {
@@ -46,9 +51,6 @@ const Manager = () => {
       .catch((error) => {
         console.error(error);
       });
-    // console.log("1", man1);
-    // console.log("2", man2);
-    // console.log("3", man3);
   }, []);
 
   return (

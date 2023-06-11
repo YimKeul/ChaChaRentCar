@@ -25,6 +25,7 @@ const carImageMap = {
   카니발: carImages.kanival,
 };
 const Reserve = () => {
+  // home.jsx에서 변수값 전달받음
   const location = useLocation();
   const [nowDate] = useState(location.state.startDate);
   const [startDate, setStartDate] = useState(location.state.startDate);
@@ -35,10 +36,14 @@ const Reserve = () => {
     setFilter(["전체"]);
   };
 
+  // 배열 변수 값을 "," 추가해 쿼리문을 실핼하기 위해 문자 포맷팅 함수
   const formatArrayToString = (arr) => {
     return arr.join(",");
   };
+
+  // 예약 버튼 함수
   const searchRentCar = () => {
+    // 만약 전체인 경우, 시작날짜, 종료날짜를 입력으로 예약 가능한 차량 조회 함수
     if (filter[0] === "전체") {
       axios
         .get(
@@ -54,6 +59,7 @@ const Reserve = () => {
           console.error(error);
         });
     } else {
+      // 그 외 차종까지 추가해 예약 가능한 차량 조회 함수
       axios
         .get(
           `/searchRentCarOps?startDate=${convertDateFormat(
@@ -71,12 +77,14 @@ const Reserve = () => {
         });
     }
   };
+  // 조회 결과 데이터를 저장하는 변수
   const [data, setData] = useState();
   useEffect(() => {
     searchRentCar();
     // eslint-disable-next-line
   }, []);
 
+  // home.jsx와 동일
   const handleFilter = (button) => {
     if (button === "전체") {
       setFilter(["전체"]);
@@ -92,9 +100,9 @@ const Reserve = () => {
   return (
     <div>
       <Header />
-
       <S.ContainerRow>
         <S.LeftHalf>
+          {/* 조회 결과 데이터를 map 함수를 통해 반복 렌더링 */}
           {data &&
             data.map((car, index) => (
               <CarCard

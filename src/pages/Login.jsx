@@ -74,10 +74,7 @@ const Login = () => {
           <Cfonts>
             관리자이신가요?
             <Link to="/manager" style={{ textDecoration: "none" }}>
-              <span
-                style={{ cursor: "pointer", color: `${CnuBlue}` }}
-                onClick={() => {}}
-              >
+              <span style={{ color: `${CnuBlue}` }}>
                 관리자 페이지 이동하기
               </span>
             </Link>

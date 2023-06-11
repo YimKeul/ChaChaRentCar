@@ -315,6 +315,7 @@ app.get("/rentalBeforeList", (req, res) => {
     res.json(results);
   });
 });
+
 // 반납
 app.get("/onPay", (req, res) => {
   const userName = req.query.name;
@@ -397,36 +398,6 @@ app.get("/man2", (req, res) => {
 });
 
 //관리자 질의 3
-// app.get("/man3", (req, res) => {
-//   const query = `
-//       SELECT c.CNO, c.NAME, c.EMAIL,
-//              r.LICENSEPLATENO, r.STARTDATE, r.RESERVEDATE, r.ENDDATE
-//       FROM (
-//         SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO,
-//                ROW_NUMBER() OVER (PARTITION BY LICENSEPLATENO ORDER BY STARTDATE DESC) AS RN
-//         FROM (
-//           SELECT LICENSEPLATENO, DATERENTED AS STARTDATE, DATERENTED AS RESERVEDATE, DATERETURNED AS ENDDATE, CNO
-//           FROM PreviousRental
-//           UNION ALL
-//           SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO
-//           FROM Reserve
-//         ) AS subquery
-//       ) AS r
-//       JOIN Customer c ON r.CNO = c.CNO
-//       WHERE r.RN = 1;
-//     `;
-
-//   db.query(query, (err, results) => {
-//     if (err) {
-//       console.error(err);
-//       res.status(500).json({ error: "Internal server error" });
-//       return;
-//     }
-
-//     res.json(results);
-//   });
-// });
-
 app.get("/man3", (req, res) => {
   const query = `
   SELECT
