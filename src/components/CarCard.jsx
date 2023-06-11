@@ -22,7 +22,6 @@ const CarCard = ({
   endDate,
 }) => {
   const [isUser, setUser] = useState();
-
   // 사용자 정보 받아오는 코드
   useEffect(() => {
     setUser(sessionStorage.getItem("userId"));

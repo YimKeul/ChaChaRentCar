@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+// 포트포워딩
 const PORT = process.env.PORT || 4000;
 const db = require("./config/db.js");
 
