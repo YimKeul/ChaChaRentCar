@@ -180,7 +180,7 @@ const Manager = () => {
         {showList === "3" && (
           <S.listBox>
             <Cfonts size={20}>
-              윈도우 함수를 사용하 가장 많이 대여한 기간과 대여 수
+              윈도우 함수를 사용해 가장 많이 대여한 기간과 대여 수
             </Cfonts>
             <S.table style={{ marginTop: "20px" }}>
               <tbody>
