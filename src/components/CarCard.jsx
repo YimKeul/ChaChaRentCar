@@ -8,7 +8,7 @@ import {
   convertDateFormat,
 } from "../components";
 import axios from "axios";
-
+import { Link } from "react-router-dom";
 const CarCard = ({
   carimg,
   name,
@@ -72,7 +72,35 @@ const CarCard = ({
             </Cfonts>
           </S.leftArea>
           <S.rightArea>
-            <S.reserveBtn
+            {isUser !== null ? (
+              <S.reserveBtn
+                onClick={async () => {
+                  try {
+                    await reserve();
+                    console.log("reserve");
+                    await update();
+                    console.log("update");
+                    document.location.href = "/reserve";
+                  } catch (error) {
+                    console.log(error);
+                  }
+                }}
+              >
+                <Cfonts size={30} color="white">
+                  예약하기
+                </Cfonts>
+              </S.reserveBtn>
+            ) : (
+              <Link to="/Login" style={{ textDecoration: "none" }}>
+                <S.reserveBtn onClick={() => {}}>
+                  <Cfonts size={30} color="white">
+                    예약하기
+                  </Cfonts>
+                </S.reserveBtn>
+              </Link>
+            )}
+
+            {/* <S.reserveBtn
               onClick={async () => {
                 try {
                   await reserve();
@@ -88,7 +116,7 @@ const CarCard = ({
               <Cfonts size={30} color="white">
                 예약하기
               </Cfonts>
-            </S.reserveBtn>
+            </S.reserveBtn> */}
           </S.rightArea>
         </S.textBox>
       </S.cardBox>

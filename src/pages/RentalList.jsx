@@ -124,6 +124,9 @@ const RentalList = () => {
                                     car.startDate
                                   )}&name=${isUser}`
                                 );
+                                await axios.get(
+                                  `/updateDeleteRentCar?licensePlateNo=${car.licensePlateNo}`
+                                );
                                 await emailjs
                                   .send(
                                     "service_se1yive",

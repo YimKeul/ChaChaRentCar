@@ -156,7 +156,7 @@ app.get("/updateRentCar", (req, res) => {
   });
 });
 
-//예약 취소후 렌트카 테이블 갱신
+// 렌트카 테이블 갱신
 app.get("/updateDeleteRentCar", (req, res) => {
   const licensePlateNo = req.query.licensePlateNo;
 
@@ -315,7 +315,7 @@ app.get("/rentalBeforeList", (req, res) => {
     res.json(results);
   });
 });
-
+// 반납
 app.get("/onPay", (req, res) => {
   const userName = req.query.name;
   const paymentValue = req.query.payment;
@@ -397,24 +397,77 @@ app.get("/man2", (req, res) => {
 });
 
 //관리자 질의 3
+// app.get("/man3", (req, res) => {
+//   const query = `
+//       SELECT c.CNO, c.NAME, c.EMAIL,
+//              r.LICENSEPLATENO, r.STARTDATE, r.RESERVEDATE, r.ENDDATE
+//       FROM (
+//         SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO,
+//                ROW_NUMBER() OVER (PARTITION BY LICENSEPLATENO ORDER BY STARTDATE DESC) AS RN
+//         FROM (
+//           SELECT LICENSEPLATENO, DATERENTED AS STARTDATE, DATERENTED AS RESERVEDATE, DATERETURNED AS ENDDATE, CNO
+//           FROM PreviousRental
+//           UNION ALL
+//           SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO
+//           FROM Reserve
+//         ) AS subquery
+//       ) AS r
+//       JOIN Customer c ON r.CNO = c.CNO
+//       WHERE r.RN = 1;
+//     `;
+
+//   db.query(query, (err, results) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).json({ error: "Internal server error" });
+//       return;
+//     }
+
+//     res.json(results);
+//   });
+// });
+
 app.get("/man3", (req, res) => {
   const query = `
-      SELECT c.CNO, c.NAME, c.EMAIL,
-             r.LICENSEPLATENO, r.STARTDATE, r.RESERVEDATE, r.ENDDATE
-      FROM (
-        SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO,
-               ROW_NUMBER() OVER (PARTITION BY LICENSEPLATENO ORDER BY STARTDATE DESC) AS RN
-        FROM (
-          SELECT LICENSEPLATENO, DATERENTED AS STARTDATE, DATERENTED AS RESERVEDATE, DATERETURNED AS ENDDATE, CNO
-          FROM PreviousRental
-          UNION ALL
-          SELECT LICENSEPLATENO, STARTDATE, RESERVEDATE, ENDDATE, CNO
-          FROM Reserve
-        ) AS subquery
-      ) AS r
-      JOIN Customer c ON r.CNO = c.CNO
-      WHERE r.RN = 1;
-    `;
+  SELECT
+    startDate,
+    endDate,
+    rentalCount
+  FROM
+    (
+        SELECT
+            startDate,
+            endDate,
+            rentalCount,
+            ROW_NUMBER() OVER (ORDER BY rentalCount DESC) AS row_num
+        FROM
+            (
+                SELECT
+                    r.startDate,
+                    r.endDate,
+                    COUNT(*) AS rentalCount
+                FROM
+                    (
+                        SELECT
+                            r.licensePlateNo,
+                            r.startDate,
+                            r.endDate
+                        FROM
+                            chacharentcar_db.Reserve r
+                        UNION ALL
+                        SELECT
+                            pr.licensePlateNo,
+                            pr.dateRented AS startDate,
+                            pr.dateReturned AS endDate
+                        FROM
+                            chacharentcar_db.PreviousRental pr
+                    ) AS r
+                GROUP BY
+                    r.startDate,
+                    r.endDate
+            ) AS subquery
+    ) AS ranked;
+  `;
 
   db.query(query, (err, results) => {
     if (err) {
@@ -422,31 +475,9 @@ app.get("/man3", (req, res) => {
       res.status(500).json({ error: "Internal server error" });
       return;
     }
-
     res.json(results);
   });
 });
-
-//메일 보내기 작업용
-// app.get("/getEmail", (req, res) => {
-//   const userName = req.query.name;
-
-//   const query = `
-//       SELECT email
-//       FROM Customer
-//       WHERE name = ?;
-//     `;
-
-//   db.query(query, [userName], (err, results) => {
-//     if (err) {
-//       console.error(err);
-//       res.status(500).json({ error: "Internal server error" });
-//       return;
-//     }
-//     // console.log(results);
-//     res.json(results);
-//   });
-// });
 
 app.listen(PORT, () => {
   console.log(`Server On : http://localhost:${PORT}`);

@@ -46,10 +46,10 @@ const Manager = () => {
       .catch((error) => {
         console.error(error);
       });
-    console.log("1", man1);
-    console.log("2", man2);
-    console.log("3", man3);
-  });
+    // console.log("1", man1);
+    // console.log("2", man2);
+    // console.log("3", man3);
+  }, []);
 
   return (
     <S.out>
@@ -180,35 +180,25 @@ const Manager = () => {
         {showList === "3" && (
           <S.listBox>
             <Cfonts size={20}>
-              윈도우 함수를 사용하 각 차량별 최근 대여 및 예약자 정보
+              윈도우 함수를 사용하 가장 많이 대여한 기간과 대여 수
             </Cfonts>
             <S.table style={{ marginTop: "20px" }}>
               <tbody>
                 <S.tableRow>
-                  <S.tableHeader>차량 번호</S.tableHeader>
-                  <S.tableHeader>고유 아이디</S.tableHeader>
-                  <S.tableHeader>이름</S.tableHeader>
-                  <S.tableHeader>이메일</S.tableHeader>
-                  <S.tableHeader>예약일</S.tableHeader>
-                  <S.tableHeader>대여일</S.tableHeader>
-                  <S.tableHeader>종료일</S.tableHeader>
+                  <S.tableHeader>대여 시작일</S.tableHeader>
+                  <S.tableHeader>대여 종료일</S.tableHeader>
+                  <S.tableHeader>대여수</S.tableHeader>
                 </S.tableRow>
                 {man3 &&
                   man3.map((data, index) => (
                     <S.tableRow key={index}>
-                      <S.tableData>{data.LICENSEPLATENO}</S.tableData>
-                      <S.tableData>{data.CNO}</S.tableData>
-                      <S.tableData>{data.NAME}</S.tableData>
-                      <S.tableData>{data.EMAIL}</S.tableData>
                       <S.tableData>
-                        {convertDateFormat(data.RESERVEDATE)}
+                        {convertDateFormat(data.startDate)}
                       </S.tableData>
                       <S.tableData>
-                        {convertDateFormat(data.STARTDATE)}
+                        {convertDateFormat(data.endDate)}
                       </S.tableData>
-                      <S.tableData>
-                        {convertDateFormat(data.ENDDATE)}
-                      </S.tableData>
+                      <S.tableData>{data.rentalCount}</S.tableData>
                     </S.tableRow>
                   ))}
               </tbody>
