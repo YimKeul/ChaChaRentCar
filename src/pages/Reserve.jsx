@@ -25,20 +25,34 @@ const carImageMap = {
   카니발: carImages.kanival,
 };
 const Reserve = () => {
+  // home.jsx에서 변수값 전달받음
   const location = useLocation();
   const [nowDate] = useState(location.state.startDate);
   const [startDate, setStartDate] = useState(location.state.startDate);
   const [endDate, setEndDate] = useState(location.state.endDate);
   const [filter, setFilter] = useState(location.state.filter);
 
+  // 조회 결과 데이터를 저장하는 변수
+  const [data, setData] = useState();
+  // cno 저장 변수
+  const [isCno, setCno] = useState();
+
+  // 예약/대여 날짜 저장 배열과 중복검사용 변수
+  const [isCheckReserve, setCheckReserve] = useState([]);
+  const [isCheck, setCheck] = useState(location.state.isCheck);
+
   const handleAll = () => {
     setFilter(["전체"]);
   };
 
+  // 배열 변수 값을 "," 추가해 쿼리문을 실핼하기 위해 문자 포맷팅 함수
   const formatArrayToString = (arr) => {
     return arr.join(",");
   };
+
+  // 예약 버튼 함수
   const searchRentCar = () => {
+    // 만약 전체인 경우, 시작날짜, 종료날짜를 입력으로 예약 가능한 차량 조회 함수
     if (filter[0] === "전체") {
       axios
         .get(
@@ -54,6 +68,7 @@ const Reserve = () => {
           console.error(error);
         });
     } else {
+      // 그 외 차종까지 추가해 예약 가능한 차량 조회 함수
       axios
         .get(
           `/searchRentCarOps?startDate=${convertDateFormat(
@@ -71,13 +86,9 @@ const Reserve = () => {
         });
     }
   };
-  const [data, setData] = useState();
-  const [isCno, setCno] = useState();
-  const [isCheckReserve, setCheckReserve] = useState([]);
-  const [isCheck, setCheck] = useState(location.state.isCheck);
 
+  // 조회 결과 데이터를 저장하는 변수
   useEffect(() => {
-    console.log("홈에서 받아온 값", isCheck);
     searchRentCar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -94,6 +105,7 @@ const Reserve = () => {
       });
   }, [isCno]);
 
+  // 예약 / 대여 중복 검사
   useEffect(() => {
     const isWithRange = isCheckReserve.some((data) => {
       return (
@@ -109,6 +121,7 @@ const Reserve = () => {
     setCheck(!isWithRange);
   }, [startDate, endDate, isCheckReserve]);
 
+  // home.jsx와 동일
   const handleFilter = (button) => {
     if (button === "전체") {
       setFilter(["전체"]);
@@ -126,6 +139,7 @@ const Reserve = () => {
       <Header />
       <S.ContainerRow>
         <S.LeftHalf>
+          {/* 조회 결과 데이터를 map 함수를 통해 반복 렌더링 */}
           {data &&
             data.map((car, index) => (
               <CarCard

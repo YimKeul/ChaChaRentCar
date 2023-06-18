@@ -11,10 +11,12 @@ import { GrPowerReset } from "react-icons/gr";
 import axios from "axios";
 
 const Home = () => {
+  //날짜 저장 변수
   const [nowDate] = useState(new Date());
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
 
+  // 차종 저장 배열
   const [filter, setFilter] = useState(["전체"]);
 
   const [isCno, setCno] = useState();
@@ -23,10 +25,12 @@ const Home = () => {
   const [isCheckReserve, setCheckReserve] = useState([]);
   const [isCheck, setCheck] = useState();
 
+  // 처음 화면 렌더링시 차종 저장 배열에 "전체" 저장
   useEffect(() => {
     setFilter(["전체"]);
   }, []);
 
+  // cno를 기준으로 Reserve테이블에 startDate, endDate 요청하는 쿼리문
   useEffect(() => {
     setCno(sessionStorage.getItem("userCNO"));
     axios
@@ -40,6 +44,7 @@ const Home = () => {
       });
   }, [isCno]);
 
+  //some 함수를 통해 날짜 중복 검사
   useEffect(() => {
     const isWithRange = isCheckReserve.some((data) => {
       return (
@@ -55,6 +60,7 @@ const Home = () => {
     setCheck(!isWithRange);
   }, [startDate, endDate, isCheckReserve]);
 
+  // filter값을 "전체"로 바꾸는 함수
   const handleAll = () => {
     setFilter(["전체"]);
   };
@@ -99,6 +105,7 @@ const Home = () => {
               </S.row>
               <S.row2>
                 <div>
+                  {/* 시작 날짜 선택할 수 있는 DatePicker */}
                   <DatePicker
                     showIcon
                     selected={startDate}
@@ -109,6 +116,7 @@ const Home = () => {
                   ~
                 </Cfonts>
                 <div>
+                  {/* 종료 날짜 선택할 수 있는 DatePicker */}
                   <DatePicker
                     showIcon
                     selected={endDate}
@@ -119,6 +127,7 @@ const Home = () => {
               <S.row>
                 <S.row3>
                   <AiFillCar size={20} style={{ paddingRight: "8px" }} />
+                  {/* 차종 선택 효과 , 클릭시 테두리 색 변경 및 filter 데이터 변경 */}
                   <Cfonts size={20}>
                     {filter.includes("전체")
                       ? "모든 차량"
@@ -184,7 +193,9 @@ const Home = () => {
                 </S.btnBox>
               </S.row4>
             </S.RightContentBox>
+            {/* 날짜 검색 조건 설정 */}
             {nowDate <= startDate && startDate <= endDate ? (
+              // 조건에 맞는 경우 선택한 값들을 검색 페이지에 전달 후 화면 이동
               <Link
                 to="/reserve"
                 state={{
@@ -203,6 +214,7 @@ const Home = () => {
                 </S.ButtonBox>
               </Link>
             ) : (
+              // 조건에 맞지 않는 경우 경고창 띄움
               <S.ButtonBox
                 onClick={() => {
                   alert("날짜를 확인해주세요");
