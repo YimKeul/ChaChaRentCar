@@ -20,15 +20,20 @@ const CarCard = ({
   options,
   startDate,
   endDate,
+  isCheck,
 }) => {
   const [isUser, setUser] = useState();
-  // 사용자 정보 받아오는 코드
+
+  useEffect(() => {
+    console.log("carCard", isCheck);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     setUser(sessionStorage.getItem("userId"));
   }, [isUser]);
 
   const reserve = () => {
-    // 예약을 하기위해 차량 번호, 시작 날짜, 종료날짜, 사용자 이름을 입력으로 예약 테이블에 차량 추가
     axios
       .get(
         `/reserve?licensePlateNo=${licensePlateNo}&startDate=${convertDateFormat(
@@ -47,7 +52,6 @@ const CarCard = ({
   };
 
   const update = () => {
-    // 예약 후 RentCar테이블도 차량번호와 사용자 이름에 따른 데이터 갱신
     axios
       .get(`/updateRentCar?licensePlateNo=${licensePlateNo}&userName=${isUser}`)
       .then((response) => {
@@ -74,31 +78,49 @@ const CarCard = ({
               {fuel} / {numberOfSeats}인승 / 일일 {rentRatePerDay}원 / {options}
             </Cfonts>
           </S.leftArea>
+          {/* 중복된 예약/대여 내역이 없는 경우 예약 */}
+          {/* 중복된 예약/대여 내역이 있는 경우 알림표시 */}
+          {/* 로그인 안하고 예약 누를시 로그인 화면 이동 */}
           <S.rightArea>
             {isUser !== null ? (
-              // 로그인이 되어 있는 경우
-              <S.reserveBtn
-                onClick={async () => {
-                  // 예약 버튼 클릭시 , 예약, 테이블 업데이트 , 화면 새로고침을 순서대로 실행
-                  try {
-                    await reserve();
-                    console.log("reserve");
-                    await update();
-                    console.log("update");
-                    document.location.href = "/reserve";
-                  } catch (error) {
-                    console.log(error);
-                  }
-                }}
-              >
-                <Cfonts size={30} color="white">
-                  예약하기
-                </Cfonts>
-              </S.reserveBtn>
+              <>
+                {isCheck === true ? (
+                  <div>
+                    <S.reserveBtn
+                      onClick={async () => {
+                        try {
+                          await reserve();
+                          console.log("reserve");
+                          await update();
+                          console.log("update");
+                          document.location.href = "/reserve";
+                        } catch (error) {
+                          console.log(error);
+                        }
+                      }}
+                    >
+                      <Cfonts size={30} color="white">
+                        예약하기
+                      </Cfonts>
+                    </S.reserveBtn>
+                  </div>
+                ) : (
+                  <div>
+                    <S.reserveBtn
+                      onClick={() => {
+                        alert("중복된 예약 / 대여한 차량 정보가 있습니다.");
+                      }}
+                    >
+                      <Cfonts size={30} color="white">
+                        예약하기
+                      </Cfonts>
+                    </S.reserveBtn>
+                  </div>
+                )}
+              </>
             ) : (
-              // 로그인이 안되어 있는 경우 로그인 페이지로 이동
               <Link to="/Login" style={{ textDecoration: "none" }}>
-                <S.reserveBtn onClick={() => {}}>
+                <S.reserveBtn>
                   <Cfonts size={30} color="white">
                     예약하기
                   </Cfonts>

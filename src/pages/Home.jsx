@@ -4,26 +4,57 @@ import styled from "styled-components";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Link } from "react-router-dom";
-import { CnuBlue, ChaCha, LightGray } from "../components";
+import { CnuBlue, ChaCha, LightGray, convertDateFormat } from "../components";
 import { bgimg } from "../images";
 import { AiOutlineClockCircle, AiFillCar } from "react-icons/ai";
 import { GrPowerReset } from "react-icons/gr";
+import axios from "axios";
 
 const Home = () => {
-  //날짜 저장 변수
   const [nowDate] = useState(new Date());
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
 
-  // 차종 저장 배열
   const [filter, setFilter] = useState(["전체"]);
 
-  // 처음 화면 렌더링시 차종 저장 배열에 "전체" 저장
+  const [isCno, setCno] = useState();
+
+  // 예약/대여 날짜 저장 배열과 중복검사용 변수
+  const [isCheckReserve, setCheckReserve] = useState([]);
+  const [isCheck, setCheck] = useState();
+
   useEffect(() => {
     setFilter(["전체"]);
   }, []);
 
-  // filter값을 "전체"로 바꾸는 함수
+  useEffect(() => {
+    setCno(sessionStorage.getItem("userCNO"));
+    axios
+      .get(`/checkReserve?cno=${isCno}`)
+      .then((response) => {
+        setCheckReserve(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, [isCno]);
+
+  useEffect(() => {
+    const isWithRange = isCheckReserve.some((data) => {
+      return (
+        (convertDateFormat(startDate) >= convertDateFormat(data.startDate) &&
+          convertDateFormat(startDate) <= convertDateFormat(data.endDate)) ||
+        (convertDateFormat(endDate) >= convertDateFormat(data.startDate) &&
+          convertDateFormat(endDate) <= convertDateFormat(data.endDate)) ||
+        (convertDateFormat(startDate) <= convertDateFormat(data.startDate) &&
+          convertDateFormat(endDate) >= convertDateFormat(data.endDate))
+      );
+    });
+    // "true : 안겹침, 예약 가능", "false : 겹침,예약불가"
+    setCheck(!isWithRange);
+  }, [startDate, endDate, isCheckReserve]);
+
   const handleAll = () => {
     setFilter(["전체"]);
   };
@@ -67,7 +98,6 @@ const Home = () => {
                 <Cfonts size={20}>예약 기간</Cfonts>
               </S.row>
               <S.row2>
-                {/* 시작 날짜 선택할 수 있는 DatePicker */}
                 <div>
                   <DatePicker
                     showIcon
@@ -79,7 +109,6 @@ const Home = () => {
                   ~
                 </Cfonts>
                 <div>
-                  {/* 종료 날짜 선택할 수 있는 DatePicker */}
                   <DatePicker
                     showIcon
                     selected={endDate}
@@ -90,7 +119,6 @@ const Home = () => {
               <S.row>
                 <S.row3>
                   <AiFillCar size={20} style={{ paddingRight: "8px" }} />
-                  {/* 차종 선택 효과 , 클릭시 테두리 색 변경 및 filter 데이터 변경 */}
                   <Cfonts size={20}>
                     {filter.includes("전체")
                       ? "모든 차량"
@@ -156,9 +184,7 @@ const Home = () => {
                 </S.btnBox>
               </S.row4>
             </S.RightContentBox>
-            {/* 날짜 검색 조건 설정 */}
             {nowDate <= startDate && startDate <= endDate ? (
-              // 조건에 맞는 경우 선택한 값들을 검색 페이지에 전달 후 화면 이동
               <Link
                 to="/reserve"
                 state={{
@@ -166,6 +192,7 @@ const Home = () => {
                   nowDate: nowDate,
                   startDate: startDate,
                   endDate: endDate,
+                  isCheck: isCheck,
                 }}
                 style={{ textDecoration: "none" }}
               >
@@ -176,7 +203,6 @@ const Home = () => {
                 </S.ButtonBox>
               </Link>
             ) : (
-              // 조건에 맞지 않는 경우 경고창 띄움
               <S.ButtonBox
                 onClick={() => {
                   alert("날짜를 확인해주세요");
